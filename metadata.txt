@@ -3,7 +3,7 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=QGIS Sounds Effects
+name=QGIS Sound Effects
 qgisMinimumVersion=3.32
 description=Add sound effects to QGIS to make work less boring
 version=0.1

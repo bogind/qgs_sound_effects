@@ -68,7 +68,7 @@ class QgisSoundEffects:
         # Declare instance attributes
         self.last_entry = None
         self.actions = []
-        self.menu = self.tr(u'&QGIS Sounds Effects')
+        self.menu = self.tr(u'&QGIS Sound Effects')
         self.sounds = {
             'fail': QSound(os.path.join(self.plugin_dir, 'sounds/fail.wav')),
             'success': QSound(os.path.join(self.plugin_dir, 'sounds/success.wav')),
