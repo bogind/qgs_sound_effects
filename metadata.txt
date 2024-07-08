@@ -12,8 +12,8 @@ email=dror.bogin@gmail.com
 
 about=Add sound effects to QGIS to make work less boring.
 
-tracker=http://bugs
-repository=http://repo
+tracker=https://github.com/bogind/qgs_sound_effects/issues
+repository=https://github.com/bogind/qgs_sound_effects
 # End of mandatory metadata
 
 # Recommended items:
@@ -25,7 +25,7 @@ hasProcessingProvider=no
 # Tags are comma separated with spaces allowed
 tags=python,sound effects,sounds,effects,silly
 
-homepage=http://homepage
+homepage=https://github.com/bogind/qgs_sound_effects
 category=Plugins
 icon=qgs_effects_icon.png
 # experimental flag
