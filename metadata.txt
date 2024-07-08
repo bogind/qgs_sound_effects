@@ -27,9 +27,9 @@ tags=python,sound effects,sounds,effects,silly
 
 homepage=http://homepage
 category=Plugins
-icon=icon.png
+icon=qgs_effects_icon.png
 # experimental flag
-experimental=True
+experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
