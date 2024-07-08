@@ -78,6 +78,7 @@ class QgisSoundEffects:
         self.update_last_entry()
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_processing_entry)
+        self.timer.start(1000)
 
         
         #self.history.entryAdded.connect(self.onEntryAdded)
@@ -266,11 +267,10 @@ class QgisSoundEffects:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
-       
+        self.timer.stop()
         # remove the toolbar
         del self.toolbar
-        if self.enabled:
-            self.timer.stop()
+        
 
 
     def get_setting(self, key: str, default: str = None):
