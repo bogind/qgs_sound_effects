@@ -1,0 +1,72 @@
+{
+    "fail": {
+        "filename": "sounds/fail.wav",
+        "label": "Failure",
+        "length": 5641
+        },
+    "success": {
+        "filename": "sounds/success.wav",
+        "label": "Success",
+        "length": 1199
+    },
+    "retro_jump": {
+        "filename": "sounds/retro_jump.wav",
+        "label": "Retro Jump",
+        "length": 226
+    },
+    "sprout": {
+        "filename": "sounds/sprout.wav",
+        "label": "Sprout",
+        "length": 202
+    },
+    "access_denied_buzz": {
+        "filename": "sounds/access_denied_buzz.wav",
+        "label": "Access Denied Buzz",
+        "length": 309
+    },
+    "pop": {
+        "filename": "sounds/pop.wav",
+        "label": "Pop",
+        "length": 650
+    },
+    "synth-glide": {
+        "filename": "sounds/synth-glide.wav",
+        "label": "Synth Glide",
+        "length": 208
+    },
+    "gliding_beep": {
+        "filename": "sounds/gliding_beep.wav",
+        "label": "Gliding Beep",
+        "length": 1800
+    },
+    "burp": {
+        "filename": "sounds/burp.wav",
+        "label": "Burp",
+        "length": 172
+    },
+    "fart": {
+        "filename": "sounds/fart.wav",
+        "label": "Fart",
+        "length": 214
+    },
+    "woodenfrog": {
+        "filename": "sounds/woodenfrog.wav",
+        "label": "Wooden Frog",
+        "length": 321
+    },
+    "laser_shot": {
+        "filename": "sounds/laser_shot.wav",
+        "label": "Laser Shot",
+        "length": 110
+    },
+    "good_answer_harp": {
+        "filename": "sounds/good_answer_harp.wav",
+        "label": "Good Answer Harp",
+        "length": 1900
+    },
+    "tada": {
+        "filename": "sounds/tada.wav",
+        "label": "Ta Da!",
+        "length": 1716
+    }
+}

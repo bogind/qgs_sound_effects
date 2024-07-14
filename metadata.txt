@@ -6,7 +6,7 @@
 name=QGIS Sound Effects
 qgisMinimumVersion=3.32
 description=Add sound effects to QGIS to make work less boring
-version=0.1
+version=0.2
 author=Dror Bogin
 email=dror.bogin@gmail.com
 
@@ -18,7 +18,7 @@ repository=https://github.com/bogind/qgs_sound_effects
 
 # Recommended items:
 
-hasProcessingProvider=no
+hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
 

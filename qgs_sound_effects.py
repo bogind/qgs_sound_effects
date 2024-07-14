@@ -31,6 +31,7 @@ from PyQt5.QtMultimedia import QSound
 
 # Initialize Qt resources from file resources.py
 from .resources import *  # noqa: F403
+from .qgs_sound_effects_provider import QgisSoundEffectsProvider
 # Import the code for the dialog
 from .qgs_sound_effects_dialog import QgisSoundEffectsDialog
 import os.path
@@ -66,6 +67,7 @@ class QgisSoundEffects:
             QCoreApplication.installTranslator(self.translator)
 
         # Declare instance attributes
+        self.provider = None
         self.last_entry = None
         self.actions = []
         self.menu = self.tr(u'&QGIS Sound Effects')
@@ -230,8 +232,14 @@ class QgisSoundEffects:
         return action
 
 
+    def initProcessing(self):
+        self.provider = QgisSoundEffectsProvider()
+        QgsApplication.processingRegistry().addProvider(self.provider)
+
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
+
+        self.initProcessing()
 
         icon_path = ':/plugins/qgs_sound_effects/qgs_effects_icon.png'
         
@@ -270,7 +278,7 @@ class QgisSoundEffects:
         self.timer.stop()
         # remove the toolbar
         del self.toolbar
-        
+        QgsApplication.processingRegistry().removeProvider(self.provider)
 
 
     def get_setting(self, key: str, default: str = None):

@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/plugins/qgs_sound_effects" >
         <file>qgs_effects_icon.png</file>
+        <file>qgs_effects_config_icon.png</file>
     </qresource>
 </RCC>
