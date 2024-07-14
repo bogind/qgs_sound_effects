@@ -277,8 +277,12 @@ class QgisSoundEffects:
         """Removes the plugin menu item and icon from QGIS GUI."""
         self.timer.stop()
         # remove the toolbar
-        del self.toolbar
-        QgsApplication.processingRegistry().removeProvider(self.provider)
+        if self.toolbar is not None:
+            self.toolbar = None
+        
+        provider = QgsApplication.processingRegistry().providerById(self.provider.id())
+        if provider is not None:
+            QgsApplication.processingRegistry().removeProvider(self.provider)
 
 
     def get_setting(self, key: str, default: str = None):
