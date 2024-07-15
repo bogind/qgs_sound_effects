@@ -22,18 +22,19 @@
  ***************************************************************************/
 """
 
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QTimer, QDateTime
+import json
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QTimer, QDateTime, QUrl
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QCheckBox
+from qgis.PyQt.QtWidgets import QAction, QCheckBox, QToolButton, QComboBox, QDoubleSpinBox
 from qgis.gui import QgsGui
-from qgis.core import QgsSettings
-from PyQt5.QtMultimedia import QSound
+from qgis.core import QgsSettings, QgsApplication
+from PyQt5.QtMultimedia import QSoundEffect
 
 # Initialize Qt resources from file resources.py
 from .resources import *  # noqa: F403
 from .qgs_sound_effects_provider import QgisSoundEffectsProvider
 # Import the code for the dialog
-from .qgs_sound_effects_dialog import QgisSoundEffectsDialog
+from .qgs_sound_effects_dialog import QgisSoundEffectsDialog, QgisSoundEffectsConfigDialog
 import os.path
 
 
@@ -67,13 +68,49 @@ class QgisSoundEffects:
             QCoreApplication.installTranslator(self.translator)
 
         # Declare instance attributes
+        self.config_window = None
         self.provider = None
         self.last_entry = None
         self.actions = []
+        self.previousScale = self.iface.mapCanvas().scale()
+        self.config = self.restore_settings()
         self.menu = self.tr(u'&QGIS Sound Effects')
-        self.sounds = {
-            'fail': QSound(os.path.join(self.plugin_dir, 'sounds/fail.wav')),
-            'success': QSound(os.path.join(self.plugin_dir, 'sounds/success.wav')),
+        with open(os.path.join(self.plugin_dir,'sounds.json')) as f:
+            self.sounds_config = json.load(f)
+            f.close()
+
+        self.sound_names = [self.sounds_config[s]['label'] for s in self.sounds_config.keys()]
+        self.sound_effects = {}
+        for sound in self.sounds_config.keys():
+            effect = QSoundEffect()
+            effect.setSource(QUrl.fromLocalFile(os.path.join(self.plugin_dir, self.sounds_config[sound]['filename'])))
+            self.sound_effects[sound] = effect
+
+        
+
+        self.canvas_events = {
+            'scale_changed': {
+                'id': 'scaleChanged',
+                'sound': 'success',
+                'enabled': True,
+            },
+            'layers_changed': {
+                'id': 'layersChanged',
+                'sound': 'success',
+                'enabled': True,
+            },
+            'render_complete': {
+                'id': 'renderComplete',
+                'sound': 'success',
+                'enabled': True,
+
+            },
+            'render_error': {
+                'id': 'renderErrorOccurred',
+                'sound': 'fail',
+                'enabled': True,
+            }
+            
         }
         self.history = QgsGui.historyProviderRegistry()
         self.configure()
@@ -106,12 +143,100 @@ class QgisSoundEffects:
     
     def configure(self):
         """Configure the plugin"""
-        self.bound_sounds = {
-            'fail': self.get_setting('fail_sound', 'fail'),
-            'success': self.get_setting('success_sound', 'success'),
-        }
-        self.set_setting('fail_sound', self.bound_sounds['fail'])
-        self.set_setting('success_sound', self.bound_sounds['success'])
+        try:
+            if self.config is None:
+                self.config = self.restore_settings()
+            if self.previousScale is None:
+                self.previousScale = self.iface.mapCanvas().scale()
+            self.bound_sounds = {
+                'processingFailure': QSoundEffect(),
+                'processingSuccess': QSoundEffect(),
+                'zoomIn': QSoundEffect(),
+                'zoomOut': QSoundEffect(),
+                'layersChanged': QSoundEffect(),
+                'renderComplete': QSoundEffect(),
+                'renderErrorOccurred': QSoundEffect()
+            }
+            for event in self.bound_sounds.keys():
+                eventConfig = self.config.get(event, {})
+                soundID = eventConfig.get('sound', 'success')
+                volume = eventConfig.get('volume', 1.0)
+                self.bound_sounds[event].setSource(self.sound_effects[soundID].source())
+                self.bound_sounds[event].setVolume(volume)
+        except Exception as e:
+            self.mb.pushCritical('Error configuring sound effects plugin', str(e))
+
+        self.toggle_canvas_events()
+        
+    
+    def toggle_canvas_events(self):
+        config  = self.config.get('layersChanged', {})
+        enabled = config.get('enabled', False)
+        if enabled:
+            self.iface.mapCanvas().layersChanged.connect(self.bound_sounds['layersChanged'].play)
+        else:
+            try:
+                self.iface.mapCanvas().layersChanged.disconnect(self.bound_sounds['layersChanged'].play)
+            except Exception as e: # noqa: F841
+                # This will happen if the event was not connected
+                pass
+
+        zoomInconfig  = self.config.get('zoomIn', {})
+        zoomOutconfig  = self.config.get('zoomOut', {})
+        zoomInEnabled = zoomInconfig.get('enabled', False)
+        zoomOutEnabled = zoomOutconfig.get('enabled', False)
+        if zoomInEnabled or zoomOutEnabled:
+            self.iface.mapCanvas().scaleChanged.connect(self.onScaleChanged)
+        else:
+            try:
+                self.iface.mapCanvas().scaleChanged.disconnect(self.onScaleChanged)
+            except Exception as e:  # noqa: F841
+                # This will happen if the event was not connected
+                pass
+                
+        
+        config  = self.config.get('renderComplete', {})
+        enabled = config.get('enabled', False)
+        if enabled:
+            self.iface.mapCanvas().renderComplete.connect(self.bound_sounds['renderComplete'].play)
+        else:
+            try:
+                self.iface.mapCanvas().renderComplete.disconnect(self.bound_sounds['renderComplete'].play)
+            except Exception as e: # noqa: F841
+                # This will happen if the event was not connected
+                pass         
+
+        config  = self.config.get('renderErrorOccurred', {})
+        enabled = config.get('enabled', False)
+        if enabled:
+            self.iface.mapCanvas().renderErrorOccurred.connect(self.bound_sounds['renderErrorOccurred'].play)
+        else:
+            try:
+                self.iface.mapCanvas().renderErrorOccurred.disconnect(self.bound_sounds['renderErrorOccurred'].play)
+            except Exception as e: # noqa: F841
+                # This will happen if the event was not connected
+                pass
+
+
+    def onScaleChanged(self, scale): 
+        zoomInconfig  = self.config.get('zoomIn', {})
+        zoomOutconfig  = self.config.get('zoomOut', {})
+        zoomInEnabled = zoomInconfig.get('enabled', False)
+        zoomOutEnabled = zoomOutconfig.get('enabled', False)       
+        if self.previousScale is None:
+            pass
+        else:
+            if self.previousScale > scale:
+                if zoomInEnabled:
+                    self.bound_sounds['zoomIn'].play()
+            if self.previousScale < scale:
+                if zoomOutEnabled:
+                    self.bound_sounds['zoomOut'].play()
+            else:
+                # why would this happen?
+                print(self.previousScale, scale)
+                print('Scale did not change')    
+        self.previousScale = scale 
 
 
     def update_last_entry(self):
@@ -136,18 +261,17 @@ class QgisSoundEffects:
                 return
             last_entry = entries[len(entries)-1]
             if(self.last_entry == last_entry.id):
-                print('No new entries')
-                print(last_entry.id)
-                print(self.last_entry)
                 return
             
             if last_entry is None:
                 return # No entries, should not happen
             if 'results' in last_entry.entry:
                 if last_entry.entry['results'] is None:
-                    self.play_sound(self.bound_sounds['fail'])
+                    #self.play_sound(self.bound_sounds['processingFailure'])
+                    self.bound_sounds['processingFailure'].play()
                 else:
-                    self.play_sound(self.bound_sounds['success'])
+                    #self.play_sound(self.bound_sounds['processingSuccess'])
+                    self.bound_sounds['processingSuccess'].play()
 
             # Update the last entry id
             self.lastEntry = last_entry.id
@@ -155,86 +279,14 @@ class QgisSoundEffects:
             self.mb.pushCritical('Error checking processing entry', str(e))
 
     def play_sound(self, sound):
-        self.sounds[sound].play()
-
-    def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
-        """Add a toolbar icon to the toolbar.
-
-        :param icon_path: Path to the icon for this action. Can be a resource
-            path (e.g. ':/plugins/foo/bar.png') or a normal file system path.
-        :type icon_path: str
-
-        :param text: Text that should be shown in menu items for this action.
-        :type text: str
-
-        :param callback: Function to be called when the action is triggered.
-        :type callback: function
-
-        :param enabled_flag: A flag indicating if the action should be enabled
-            by default. Defaults to True.
-        :type enabled_flag: bool
-
-        :param add_to_menu: Flag indicating whether the action should also
-            be added to the menu. Defaults to True.
-        :type add_to_menu: bool
-
-        :param add_to_toolbar: Flag indicating whether the action should also
-            be added to the toolbar. Defaults to True.
-        :type add_to_toolbar: bool
-
-        :param status_tip: Optional text to show in a popup when mouse pointer
-            hovers over the action.
-        :type status_tip: str
-
-        :param parent: Parent widget for the new action. Defaults None.
-        :type parent: QWidget
-
-        :param whats_this: Optional text to show in the status bar when the
-            mouse pointer hovers over the action.
-
-        :returns: The action that was created. Note that the action is also
-            added to self.actions list.
-        :rtype: QAction
-        """
-
-        icon = QIcon(icon_path)
-        action = QAction(icon, text, parent)
-        action.triggered.connect(callback)
-        action.setEnabled(enabled_flag)
-
-        if status_tip is not None:
-            action.setStatusTip(status_tip)
-
-        if whats_this is not None:
-            action.setWhatsThis(whats_this)
-
-        if add_to_toolbar:
-            # Adds plugin icon to Plugins toolbar
-            self.iface.addToolBarIcon(action)
-
-        if add_to_menu:
-            self.iface.addPluginToMenu(
-                self.menu,
-                action)
-
-        self.actions.append(action)
-
-        return action
+        #self.sounds[sound]['sound'].play()
+        self.sound_effects[sound].play()
 
 
     def initProcessing(self):
         self.provider = QgisSoundEffectsProvider()
         QgsApplication.processingRegistry().addProvider(self.provider)
+
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -242,7 +294,7 @@ class QgisSoundEffects:
         self.initProcessing()
 
         icon_path = ':/plugins/qgs_sound_effects/qgs_effects_icon.png'
-        
+        config_icon_path = ':/plugins/qgs_sound_effects/qgs_effects_config_icon.png'
         
         # Add the toolbar
         self.toolbar = self.iface.addToolBar('Sound Effects Toolbar')
@@ -269,20 +321,139 @@ class QgisSoundEffects:
         # Add the sound effects toggle to the toolbar
         self.toolbar.addWidget(self.sound_effects_toggle)
 
+        #self.create_settings_window()
+        self.config_window = QgisSoundEffectsConfigDialog()
+
+        # Add the configuration icon
+        self.config_icon = QIcon(config_icon_path)
+        self.config_action = QAction(self.config_icon, 'Configure Sound Effects', self.iface.mainWindow())
+        self.config_action.triggered.connect(self.show_settings)
+
+        self.configure_settings_window()
+
+        self.toolbar.addAction(self.config_action)
+
         # will be set False in run()
         self.first_start = True
 
 
-    def unload(self):
-        """Removes the plugin menu item and icon from QGIS GUI."""
-        self.timer.stop()
-        # remove the toolbar
-        if self.toolbar is not None:
-            self.toolbar = None
         
-        provider = QgsApplication.processingRegistry().providerById(self.provider.id())
-        if provider is not None:
-            QgsApplication.processingRegistry().removeProvider(self.provider)
+    def configure_settings_window(self):
+        self.checkbox_ids = ['processingSuccessCheckBox', 'processingFailureCheckBox', 'zoomInCheckBox',
+                        'zoomOutCheckBox','layersChangedCheckBox','renderCompleteCheckBox','renderErrorOccurredCheckBox']
+        self.combobox_ids = ['processingSuccessComboBox','processingFailureComboBox','zoomInComboBox',
+                        'zoomOutComboBox','layersChangedComboBox','renderCompleteComboBox','renderErrorOccurredComboBox']
+        self.test_button_ids = ['processingSuccessTestButton','processingFailureTestButton','zoomInTestButton',
+                        'zoomOutTestButton','layersChangedTestButton','renderCompleteTestButton','renderErrorOccurredTestButton']
+        self.volume_ids = ['processingSuccessVolume','processingFailureVolume','zoomInVolume',
+                        'zoomOutVolume','layersChangedVolume','renderCompleteVolume','renderErrorOccurredVolume']
+        
+        
+        self.config_window.windowClosed.connect(lambda: print('closed config window'))
+        for i in range(0, len(self.checkbox_ids)):
+            eventID = self.objectid_to_eventid(self.checkbox_ids[i])
+            eventConfig = self.config.get(eventID, {})
+
+            checkbox_id = self.checkbox_ids[i]
+            checkbox = self.config_window.findChild(QCheckBox, checkbox_id)
+            checked = eventConfig.get('enabled', False)
+            checkbox.setChecked(checked)
+            checkbox.stateChanged.connect(self.make_toggle_event(checkbox_id))
+
+            combobox_id = self.combobox_ids[i]
+            comboBox = self.config_window.findChild(QComboBox, combobox_id)
+            for j in self.sounds_config.keys():
+                comboBox.addItem(self.sounds_config[j]['label'], j)
+
+            eventSoundIndex = eventConfig.get('sound_index', 0)
+            
+            comboBox.setCurrentIndex(eventSoundIndex)
+            comboBox.currentIndexChanged.connect(self.make_set_event_sound(combobox_id))
+            
+            test_button_id = self.test_button_ids[i]
+            test_button = self.config_window.findChild(QToolButton, test_button_id)
+            test_button.clicked.connect(self.make_test_sound(combobox_id))
+
+            volume_id = self.volume_ids[i]
+            volume = self.config_window.findChild(QDoubleSpinBox, volume_id)
+            configVolume = eventConfig.get('volume', 1.0)
+            volume.setValue(configVolume)
+
+        self.config_window.saveSettingsButton.clicked.connect(self.save_settings)
+
+    def make_set_event_sound(self, id):
+        def set_event_sound():
+            pass
+        return set_event_sound
+    
+    def make_test_sound(self, id):
+        def test_sound():
+            print('test sound for {}'.format(id))
+            comboBox = self.config_window.findChild(QComboBox, id)
+            self.play_sound(comboBox.currentData())
+        return test_sound
+    
+    def make_toggle_event(self, id):
+        def toggle_event(state):
+            state = state == 2
+            checkbox = self.config_window.findChild(QCheckBox, id)
+            checkbox.setChecked(state)
+    
+        return toggle_event
+    
+    @staticmethod
+    def objectid_to_eventid(objid):
+        return objid.replace('CheckBox','').replace('ComboBox','').replace('TestButton','').replace('Volume','')
+    
+
+    def restore_settings(self):
+        try:
+            default_config = '{"layersChanged": {"enabled": true, "sound": "woodenfrog", "sound_index": 10, "volume": 1.0}, "processingFailure": {"enabled": true, "sound": "fail", "sound_index": 0, "volume": 0.86}, "processingSuccess": {"enabled": true, "sound": "success", "sound_index": 1, "volume": 1.0}, "renderComplete": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0}, "renderErrorOccurred": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0}, "zoomIn": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0}, "zoomOut": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0}}'
+            config = json.loads(self.get_setting('config', default_config))
+            return config
+        except Exception as e:
+            print('Error restoring settings: {}'.format(str(e)))
+            return {}
+    
+
+    def save_settings(self):
+        try:
+            for i in range(0, len(self.checkbox_ids)):
+                eventID = self.objectid_to_eventid(self.checkbox_ids[i])
+                
+                checkbox_id = self.checkbox_ids[i]
+                checkbox = self.config_window.findChild(QCheckBox, checkbox_id)
+                checked = checkbox.isChecked()
+                
+                combobox_id = self.combobox_ids[i]
+                comboBox = self.config_window.findChild(QComboBox, combobox_id)
+                
+                
+
+                volume_id = self.volume_ids[i]
+                volume = self.config_window.findChild(QDoubleSpinBox, volume_id)
+                
+                event = {
+                    'enabled': checked,
+                    'sound': comboBox.currentData(),
+                    'sound_index': comboBox.currentIndex(),
+                    'volume': volume.value()
+                }
+                self.config[eventID] = event
+                
+            self.set_setting('config', json.dumps(self.config))
+            print('Settings saved')
+            print(self.config)
+            self.configure()
+        except Exception as e:
+            print('Error saving settings: {}'.format(str(e)))
+            
+        self.config_window.hide()
+
+
+    def show_settings(self):
+        """Show the settings dialog"""
+        self.config_window.show()
 
 
     def get_setting(self, key: str, default: str = None):
@@ -335,6 +506,18 @@ class QgisSoundEffects:
             self.timer.stop()
 
 
+    def unload(self):
+        """Removes the plugin menu item and icon from QGIS GUI."""
+        self.timer.stop()
+        # remove the toolbar
+        if self.toolbar is not None:
+            self.toolbar = None
+        
+        provider = QgsApplication.processingRegistry().providerById(self.provider.id())
+        if provider is not None:
+            QgsApplication.processingRegistry().removeProvider(self.provider)
+
+
     def run(self):
         """Run method that performs all the real work"""
 
@@ -343,7 +526,7 @@ class QgisSoundEffects:
         if self.first_start is True:
             self.first_start = False
             # No dialog yet, should be used for configuration of sounds to events
-            self.dlg = QgisSoundEffectsDialog()
+            self.dlg = QgisSoundEffectsDialog()            
 
         # show the dialog
         self.dlg.show()

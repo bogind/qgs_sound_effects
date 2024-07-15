@@ -21,6 +21,21 @@ repository=https://github.com/bogind/qgs_sound_effects
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+    2024-07-15 Version 0.2:
+        - Added 12 new sound effects
+        - Added the following canvas events:
+            - Zoom in
+            - Zoom out
+            - Layers changed (added or removed (I know, we'll get to separate events for each))
+            - Render Complete (for when your QGIS is stuck and you need to know when it's done rendering)
+            - Render Error (for when your QGIS is stuck and you need to know *if* it's going to make it)
+        - Added a settings dialog that allows control over:
+            - Which sound effect will be used for each event
+            - Toggle whether to play sound effects for each event
+            - The volume of the sound effects
+        - Added a processing provider and a `Play Sound Effect` algorithm, usefull for adding sound effects to your processing scripts and models
+        
+
 
 # Tags are comma separated with spaces allowed
 tags=python,sound effects,sounds,effects,silly

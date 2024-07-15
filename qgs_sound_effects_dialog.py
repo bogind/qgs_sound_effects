@@ -26,10 +26,14 @@ import os
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
+from qgis.PyQt.QtCore import pyqtSlot, pyqtSignal
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'qgs_sound_effects_dialog_base.ui'))
+
+CONFIG_FORM_CLASS, _ = uic.loadUiType(os.path.join(
+    os.path.dirname(__file__), 'qgs_sound_effects_configuration_dialog.ui'))
 
 
 class QgisSoundEffectsDialog(QtWidgets.QDialog, FORM_CLASS):
@@ -42,3 +46,36 @@ class QgisSoundEffectsDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+class QgisSoundEffectsConfigDialog_UI(QtWidgets.QDialog, CONFIG_FORM_CLASS):
+    def __init__(self, parent=None):
+        """Constructor."""
+        super(QgisSoundEffectsConfigDialog_UI, self).__init__(parent)
+        # Set up the user interface from Designer through FORM_CLASS.
+        # After self.setupUi() you can access any designer object by doing
+        # self.<objectname>, and you can use autoconnect slots - see
+        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
+        # #widgets-and-dialogs-with-auto-connect
+        # self.setupUi(self)
+
+
+class QgisSoundEffectsConfigDialog(QgisSoundEffectsConfigDialog_UI):
+
+    # Define a new signal called 'windowClosed' that has no arguments.
+    windowClosed = pyqtSignal()
+
+    def __init__(self, parent=None):
+        """Constructor."""
+        super(QgisSoundEffectsConfigDialog, self).__init__(parent)
+        # Set up the user interface from Designer through FORM_CLASS.
+        # After self.setupUi() you can access any designer object by doing
+        # self.<objectname>, and you can use autoconnect slots - see
+        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
+        # #widgets-and-dialogs-with-auto-connect
+        self.setupUi(self)
+
+    @pyqtSlot()
+    def closeEvent(self, event):
+        print("User has clicked the red x on the main window")
+        self.windowClosed.emit()
+        event.accept()

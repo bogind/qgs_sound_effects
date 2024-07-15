@@ -45,7 +45,7 @@ class PlaySoundAlgorithm(QgsProcessingAlgorithm):
         return 'play_sound'
     
     def displayName(self):
-        return 'Play Sound'
+        return 'Play Sound Effect'
     
     def group(self):
         return ''
