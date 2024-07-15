@@ -64,7 +64,9 @@ class PlaySoundAlgorithm(QgsProcessingAlgorithm):
     
     def initAlgorithm(self, config):
         self.plugin_dir = os.path.dirname(__file__)
-        self.sounds_config = json.load(open(os.path.join(self.plugin_dir,'sounds.json')))
+        with open(os.path.join(self.plugin_dir,'sounds.json')) as f:
+            self.sounds_config = json.load(f)
+            f.close()
         self.sound_names = [self.sounds_config[s]['label'] for s in self.sounds_config.keys()]
 
         sound_param = QgsProcessingParameterEnum(
