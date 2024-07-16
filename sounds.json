@@ -68,5 +68,10 @@
         "filename": "sounds/tada.wav",
         "label": "Ta Da!",
         "length": 1716
+    },
+    "sad_trombone": {
+        "filename": "sounds/sad_trombone.wav",
+        "label": "Sad Trombone",
+        "length": 3000
     }
 }
