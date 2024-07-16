@@ -71,7 +71,6 @@ class QgisSoundEffects:
         self.config_window = None
         self.provider = None
         self.last_entry = None
-        self.enabled = True
         self.actions = []
         self.previousScale = self.iface.mapCanvas().scale()
         self.config = self.restore_settings()
@@ -171,10 +170,13 @@ class QgisSoundEffects:
         
     
     def toggle_canvas_events(self):
-        config  = self.config.get('layersChanged', {})
-        enabled = config.get('enabled', False)
-        if self.enabled:
-            if enabled:
+        # Check if all events are enabled
+        if self.enabled is True:
+            config  = self.config.get('layersChanged', {})
+            enabled = config.get('enabled', False)
+
+            # Check if the layersChanged event is enabled
+            if enabled is True:
                 self.iface.mapCanvas().layersChanged.connect(self.bound_sounds['layersChanged'].play)
             else:
                 try:
@@ -183,12 +185,13 @@ class QgisSoundEffects:
                     # This will happen if the event was not connected
                     pass
 
-        zoomInconfig  = self.config.get('zoomIn', {})
-        zoomOutconfig  = self.config.get('zoomOut', {})
-        zoomInEnabled = zoomInconfig.get('enabled', False)
-        zoomOutEnabled = zoomOutconfig.get('enabled', False)
-        if self.enabled:
-            if zoomInEnabled or zoomOutEnabled:
+            zoomInconfig  = self.config.get('zoomIn', {})
+            zoomOutconfig  = self.config.get('zoomOut', {})
+            zoomInEnabled = zoomInconfig.get('enabled', False)
+            zoomOutEnabled = zoomOutconfig.get('enabled', False)
+            
+            # Check if the zoomIn or zoomOut events are enabled
+            if zoomInEnabled is True or zoomOutEnabled is True:
                 self.iface.mapCanvas().scaleChanged.connect(self.onScaleChanged)
             else:
                 try:
@@ -196,12 +199,19 @@ class QgisSoundEffects:
                 except Exception as e:  # noqa: F841
                     # This will happen if the event was not connected
                     pass
-                
-        
-        config  = self.config.get('renderComplete', {})
-        enabled = config.get('enabled', False)
-        if self.enabled:
-            if enabled:
+
+            if zoomInEnabled is False and zoomOutEnabled is False:
+                self.previousScale = self.iface.mapCanvas().scale()
+                try:
+                    self.iface.mapCanvas().scaleChanged.disconnect(self.onScaleChanged)
+                except Exception as e:  # noqa: F841
+                    # This will happen if the event was not connected
+                    pass
+                    
+            config  = self.config.get('renderComplete', {})
+            enabled = config.get('enabled', False)
+            # Check if the renderComplete event is enabled
+            if enabled is True:
                 self.iface.mapCanvas().renderComplete.connect(self.bound_sounds['renderComplete'].play)
             else:
                 try:
@@ -210,10 +220,10 @@ class QgisSoundEffects:
                     # This will happen if the event was not connected
                     pass         
 
-        config  = self.config.get('renderErrorOccurred', {})
-        enabled = config.get('enabled', False)
-        if self.enabled:
-            if enabled:
+            config  = self.config.get('renderErrorOccurred', {})
+            enabled = config.get('enabled', False)
+            # Check if the renderErrorOccurred event is enabled
+            if enabled is True:
                 self.iface.mapCanvas().renderErrorOccurred.connect(self.bound_sounds['renderErrorOccurred'].play)
             else:
                 try:
@@ -221,27 +231,39 @@ class QgisSoundEffects:
                 except Exception as e: # noqa: F841
                     # This will happen if the event was not connected
                     pass
+        else:
+            # Disable all events when the plugin is disabled
+            try:
+                self.iface.mapCanvas().layersChanged.disconnect(self.bound_sounds['layersChanged'].play)
+                self.iface.mapCanvas().scaleChanged.disconnect(self.onScaleChanged)
+                self.iface.mapCanvas().renderComplete.disconnect(self.bound_sounds['renderComplete'].play)
+                self.iface.mapCanvas().renderErrorOccurred.disconnect(self.bound_sounds['renderErrorOccurred'].play)
+            except Exception as e: # noqa: F841
+                # This will happen if the event was not connected
+                pass
 
 
     def onScaleChanged(self, scale): 
+        previousScale = self.previousScale
         zoomInconfig  = self.config.get('zoomIn', {})
         zoomOutconfig  = self.config.get('zoomOut', {})
         zoomInEnabled = zoomInconfig.get('enabled', False)
-        zoomOutEnabled = zoomOutconfig.get('enabled', False)       
-        if self.previousScale is None:
-            pass
-        else:
-            if self.previousScale > scale:
-                if zoomInEnabled:
-                    self.bound_sounds['zoomIn'].play()
-            if self.previousScale < scale:
-                if zoomOutEnabled:
-                    self.bound_sounds['zoomOut'].play()
+        zoomOutEnabled = zoomOutconfig.get('enabled', False)      
+        if self.enabled is True: 
+            if self.previousScale is None:
+                pass
             else:
-                # why would this happen?
-                print(self.previousScale, scale)
-                print('Scale did not change')    
-        self.previousScale = scale 
+                if previousScale > scale:
+                    if zoomInEnabled is True:
+                        self.bound_sounds['zoomIn'].play()
+                elif previousScale < scale:
+                    if zoomOutEnabled is True:
+                        self.bound_sounds['zoomOut'].play()
+                else:
+                    # why would this happen?
+                    print('Scale did not change')    
+        
+        self.previousScale = scale
 
 
     def update_last_entry(self):
@@ -327,6 +349,7 @@ class QgisSoundEffects:
                 self.sound_effects_toggle.setChecked(False)
                 self.enabled = False
         self.sound_effects_toggle.stateChanged.connect(self.toggle_sound_effects)
+        self.toggle_sound_effects()
 
         # Add the sound effects toggle to the toolbar
         self.toolbar.addWidget(self.sound_effects_toggle)
@@ -359,7 +382,6 @@ class QgisSoundEffects:
                         'zoomOutVolume','layersChangedVolume','renderCompleteVolume','renderErrorOccurredVolume']
         
         
-        self.config_window.windowClosed.connect(lambda: print('closed config window'))
         for i in range(0, len(self.checkbox_ids)):
             eventID = self.objectid_to_eventid(self.checkbox_ids[i])
             eventConfig = self.config.get(eventID, {})
@@ -399,7 +421,6 @@ class QgisSoundEffects:
     
     def make_test_sound(self, id):
         def test_sound():
-            print('test sound for {}'.format(id))
             comboBox = self.config_window.findChild(QComboBox, id)
             self.play_sound(comboBox.currentData())
         return test_sound
@@ -419,6 +440,7 @@ class QgisSoundEffects:
 
     def restore_settings(self):
         try:
+            self.enabled = self.get_setting('enabled', True)
             default_config = '{"layersChanged": {"enabled": false, "sound": "woodenfrog", "sound_index": 10, "volume": 1.0}, "processingFailure": {"enabled": true, "sound": "fail", "sound_index": 0, "volume": 0.86}, "processingSuccess": {"enabled": true, "sound": "success", "sound_index": 1, "volume": 1.0}, "renderComplete": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0}, "renderErrorOccurred": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0}, "zoomIn": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0}, "zoomOut": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0}}'
             config = json.loads(self.get_setting('config', default_config))
             return config
@@ -453,8 +475,6 @@ class QgisSoundEffects:
                 self.config[eventID] = event
                 
             self.set_setting('config', json.dumps(self.config))
-            print('Settings saved')
-            print(self.config)
             self.configure()
         except Exception as e:
             print('Error saving settings: {}'.format(str(e)))
@@ -511,8 +531,9 @@ class QgisSoundEffects:
         self.enabled = self.sound_effects_toggle.isChecked()
         self.set_setting('enabled', self.enabled)
         self.update_last_entry()
-        if self.enabled:
+        if self.enabled is True:
             self.timer.start(1000)
+            self.toggle_canvas_events()
         else:
             self.timer.stop()
 
