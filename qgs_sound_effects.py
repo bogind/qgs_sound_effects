@@ -172,50 +172,54 @@ class QgisSoundEffects:
     def toggle_canvas_events(self):
         config  = self.config.get('layersChanged', {})
         enabled = config.get('enabled', False)
-        if enabled:
-            self.iface.mapCanvas().layersChanged.connect(self.bound_sounds['layersChanged'].play)
-        else:
-            try:
-                self.iface.mapCanvas().layersChanged.disconnect(self.bound_sounds['layersChanged'].play)
-            except Exception as e: # noqa: F841
-                # This will happen if the event was not connected
-                pass
+        if self.enabled:
+            if enabled:
+                self.iface.mapCanvas().layersChanged.connect(self.bound_sounds['layersChanged'].play)
+            else:
+                try:
+                    self.iface.mapCanvas().layersChanged.disconnect(self.bound_sounds['layersChanged'].play)
+                except Exception as e: # noqa: F841
+                    # This will happen if the event was not connected
+                    pass
 
         zoomInconfig  = self.config.get('zoomIn', {})
         zoomOutconfig  = self.config.get('zoomOut', {})
         zoomInEnabled = zoomInconfig.get('enabled', False)
         zoomOutEnabled = zoomOutconfig.get('enabled', False)
-        if zoomInEnabled or zoomOutEnabled:
-            self.iface.mapCanvas().scaleChanged.connect(self.onScaleChanged)
-        else:
-            try:
-                self.iface.mapCanvas().scaleChanged.disconnect(self.onScaleChanged)
-            except Exception as e:  # noqa: F841
-                # This will happen if the event was not connected
-                pass
+        if self.enabled:
+            if zoomInEnabled or zoomOutEnabled:
+                self.iface.mapCanvas().scaleChanged.connect(self.onScaleChanged)
+            else:
+                try:
+                    self.iface.mapCanvas().scaleChanged.disconnect(self.onScaleChanged)
+                except Exception as e:  # noqa: F841
+                    # This will happen if the event was not connected
+                    pass
                 
         
         config  = self.config.get('renderComplete', {})
         enabled = config.get('enabled', False)
-        if enabled:
-            self.iface.mapCanvas().renderComplete.connect(self.bound_sounds['renderComplete'].play)
-        else:
-            try:
-                self.iface.mapCanvas().renderComplete.disconnect(self.bound_sounds['renderComplete'].play)
-            except Exception as e: # noqa: F841
-                # This will happen if the event was not connected
-                pass         
+        if self.enabled:
+            if enabled:
+                self.iface.mapCanvas().renderComplete.connect(self.bound_sounds['renderComplete'].play)
+            else:
+                try:
+                    self.iface.mapCanvas().renderComplete.disconnect(self.bound_sounds['renderComplete'].play)
+                except Exception as e: # noqa: F841
+                    # This will happen if the event was not connected
+                    pass         
 
         config  = self.config.get('renderErrorOccurred', {})
         enabled = config.get('enabled', False)
-        if enabled:
-            self.iface.mapCanvas().renderErrorOccurred.connect(self.bound_sounds['renderErrorOccurred'].play)
-        else:
-            try:
-                self.iface.mapCanvas().renderErrorOccurred.disconnect(self.bound_sounds['renderErrorOccurred'].play)
-            except Exception as e: # noqa: F841
-                # This will happen if the event was not connected
-                pass
+        if self.enabled:
+            if enabled:
+                self.iface.mapCanvas().renderErrorOccurred.connect(self.bound_sounds['renderErrorOccurred'].play)
+            else:
+                try:
+                    self.iface.mapCanvas().renderErrorOccurred.disconnect(self.bound_sounds['renderErrorOccurred'].play)
+                except Exception as e: # noqa: F841
+                    # This will happen if the event was not connected
+                    pass
 
 
     def onScaleChanged(self, scale): 
