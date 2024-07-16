@@ -6,7 +6,7 @@
 name=QGIS Sound Effects
 qgisMinimumVersion=3.32
 description=Add sound effects to QGIS to make work less boring
-version=0.2
+version=0.2.1
 author=Dror Bogin
 email=dror.bogin@gmail.com
 
@@ -21,6 +21,13 @@ repository=https://github.com/bogind/qgs_sound_effects
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+    2024-07-15 Version 0.2.1:
+        - bug fixes:
+            - Fixed canvas events to trigger when the global "enable" was False
+            - Fixed processing events to ignore their specific "enable" setting
+        - Changed default config for `layersChanged` to False
+        - connected the `Cancel` button to actually closing the settigns dialog (it was just for show until now apperantly)
+        - Added the sad_trombone sound effect (Highly Recommended for when things go wrong)
     2024-07-15 Version 0.2:
         - Added 12 new sound effects
         - Added the following canvas events:
