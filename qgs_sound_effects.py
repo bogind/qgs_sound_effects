@@ -259,6 +259,11 @@ class QgisSoundEffects:
         """Check if the processing entry succeeded or failed"""
         try:
             
+            processingSuccessConfig  = self.config.get('processingSuccess', {})
+            processingFailureConfig  = self.config.get('processingFailure', {})
+            processingSuccessEnabled = processingSuccessConfig.get('enabled', False)
+            processingFailureEnabled = processingFailureConfig.get('enabled', False) 
+
             # Check only the last second
             entries = self.history.queryEntries(QDateTime.currentDateTime().addSecs(-1),QDateTime.currentDateTime())
             if len(entries) == 0:
@@ -271,11 +276,11 @@ class QgisSoundEffects:
                 return # No entries, should not happen
             if 'results' in last_entry.entry:
                 if last_entry.entry['results'] is None:
-                    #self.play_sound(self.bound_sounds['processingFailure'])
-                    self.bound_sounds['processingFailure'].play()
+                    if processingFailureEnabled:
+                        self.bound_sounds['processingFailure'].play()
                 else:
-                    #self.play_sound(self.bound_sounds['processingSuccess'])
-                    self.bound_sounds['processingSuccess'].play()
+                    if processingSuccessEnabled:
+                        self.bound_sounds['processingSuccess'].play()
 
             # Update the last entry id
             self.lastEntry = last_entry.id
