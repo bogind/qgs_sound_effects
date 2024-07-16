@@ -408,7 +408,7 @@ class QgisSoundEffects:
 
     def restore_settings(self):
         try:
-            default_config = '{"layersChanged": {"enabled": true, "sound": "woodenfrog", "sound_index": 10, "volume": 1.0}, "processingFailure": {"enabled": true, "sound": "fail", "sound_index": 0, "volume": 0.86}, "processingSuccess": {"enabled": true, "sound": "success", "sound_index": 1, "volume": 1.0}, "renderComplete": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0}, "renderErrorOccurred": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0}, "zoomIn": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0}, "zoomOut": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0}}'
+            default_config = '{"layersChanged": {"enabled": false, "sound": "woodenfrog", "sound_index": 10, "volume": 1.0}, "processingFailure": {"enabled": true, "sound": "fail", "sound_index": 0, "volume": 0.86}, "processingSuccess": {"enabled": true, "sound": "success", "sound_index": 1, "volume": 1.0}, "renderComplete": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0}, "renderErrorOccurred": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0}, "zoomIn": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0}, "zoomOut": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0}}'
             config = json.loads(self.get_setting('config', default_config))
             return config
         except Exception as e:
