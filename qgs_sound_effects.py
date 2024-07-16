@@ -389,6 +389,7 @@ class QgisSoundEffects:
             volume.setValue(configVolume)
 
         self.config_window.saveSettingsButton.clicked.connect(self.save_settings)
+        self.config_window.cancelChangesButton.clicked.connect(self.config_window.hide)
 
     def make_set_event_sound(self, id):
         def set_event_sound():
