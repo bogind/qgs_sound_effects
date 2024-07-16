@@ -71,6 +71,7 @@ class QgisSoundEffects:
         self.config_window = None
         self.provider = None
         self.last_entry = None
+        self.enabled = True
         self.actions = []
         self.previousScale = self.iface.mapCanvas().scale()
         self.config = self.restore_settings()
