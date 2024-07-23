@@ -531,9 +531,9 @@ class QgisSoundEffects:
         self.enabled = self.sound_effects_toggle.isChecked()
         self.set_setting('enabled', self.enabled)
         self.update_last_entry()
+        self.toggle_canvas_events()
         if self.enabled is True:
-            self.timer.start(1000)
-            self.toggle_canvas_events()
+            self.timer.start(1000)            
         else:
             self.timer.stop()
 
