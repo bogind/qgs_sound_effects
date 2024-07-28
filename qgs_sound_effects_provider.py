@@ -407,7 +407,7 @@ class QgisSoundEffectsProvider(QgsProcessingProvider):
     
     def loadAlgorithms(self):
         self.addAlgorithm(PlaySoundEffectAlgorithm())
-        self.addAlgorithm(PlaySoundAlgorithm())
+        self.addAlgorithm(SaySomeTextAlgorithm())
         self.addAlgorithm(PlayAudioFileAlgorithm())
 
     
