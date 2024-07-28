@@ -30,7 +30,8 @@ from PyQt5.QtTextToSpeech import QTextToSpeech, QVoice
 from qgis.core import (QgsProcessingProvider, QgsProcessingAlgorithm, 
                         QgsProcessingParameterNumber,QgsProcessingParameterEnum,
                         QgsProcessingParameterString,QgsTask, QgsApplication, Qgis,
-                        QgsMessageLog)
+                        QgsMessageLog,QgsProcessingParameterFile)
+
 
 from qgis.PyQt.QtGui import QIcon
 
@@ -304,6 +305,90 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
         return SaySomeTextAlgorithm()
     
 
+class PlayAudioFileAlgorithm(QgsProcessingAlgorithm):
+    """This algorithm plays a local audio file.
+        Supported formats may vary depending on the operating system.
+    """
+
+    FILE = 'FILE'
+    VOLUME = 'VOLUME'
+    OUTPUT = 'OUTPUT'
+
+    def name(self):
+        return 'play_audio_file'
+    
+    def displayName(self):
+        return 'Play Audio File'
+    
+    def group(self):
+        return ''
+    
+    def groupId(self):
+        return ''
+    
+    def shortHelpString(self):
+        return 'Play an audio file'
+    
+    def icon(self):
+        return QIcon(':/plugins/qgs_sound_effects/qgs_effects_icon.png')
+    
+    def tr(self, string):
+        return QCoreApplication.translate('Processing', string)
+    
+    def initAlgorithm(self, config):
+        file_param = QgsProcessingParameterFile(
+                self.FILE,
+                self.tr('Audio File'),
+                fileFilter='Audio Files (*.mp3 *.wav *.ogg *.flac *.m4a *.wma *.aac *.aiff *.au *.mid *.midi *.mpc *.oga *.opus *.ra *.ram *.spx *.xspf);; All Files (*.*)'
+            )
+        volume_param = QgsProcessingParameterNumber(
+                self.VOLUME,
+                self.tr('Volume'),
+                type=QgsProcessingParameterNumber.Integer,
+                optional=True,
+                defaultValue=100,
+                maxValue=100,
+                minValue=0
+            )
+        params = [file_param, volume_param]
+        for param in params:
+            self.addParameter(param,
+                createOutput = True)
+            
+    
+    def prepareAlgorithm(self, parameters, context, feedback):
+        self.file_path = self.parameterAsFile(parameters, self.FILE, context)
+        self.play_volume = self.parameterAsInt(parameters, self.VOLUME, context)
+        self.player = QMediaPlayer()
+        
+        feedback.pushInfo('Playing audio file: {} at volume {}'.format(self.file_path, self.play_volume))
+        self.player.setVolume(int(self.play_volume))
+        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.file_path)))
+        return super().prepareAlgorithm(parameters, context, feedback)
+    
+    def processAlgorithm(self, parameters, context, feedback):
+        try:
+            if not self.player.isAudioAvailable():
+                self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.file_path)))
+                self.player.audioAvailableChanged.connect(lambda: self.player.play())
+                self.player.setVolume(int(self.play_volume))
+                self.player.play()
+            else:
+                self.player.play()
+            feedback.pushInfo('Audio file played')
+            return {self.OUTPUT:{
+            'FILE': self.file_path, 
+            'VOLUME': self.play_volume, 
+            'OUTPUT': 'Played Audio File'}
+            }
+
+        except Exception as e:
+            return {self.OUTPUT: 'Failed to play audio file', 'ERROR': str(e)}
+        
+    def createInstance(self):
+        return PlayAudioFileAlgorithm()
+    
+
 class QgisSoundEffectsProvider(QgsProcessingProvider):
     def __init__(self):
         QgsProcessingProvider.__init__(self)
@@ -322,5 +407,7 @@ class QgisSoundEffectsProvider(QgsProcessingProvider):
     
     def loadAlgorithms(self):
         self.addAlgorithm(PlaySoundEffectAlgorithm())
-        self.addAlgorithm(SaySomeTextAlgorithm())
+        self.addAlgorithm(PlaySoundAlgorithm())
+        self.addAlgorithm(PlayAudioFileAlgorithm())
+
     
