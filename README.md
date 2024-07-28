@@ -13,6 +13,8 @@ Currently supported actions are:
 - Select which sound effect, and at what volume, will be played for each event from the settings dialog.
 - Test the selected sound effect for each event from the settings dialog.
 - The `Play Sound Effect` processing algorithm, also works within the graphic modeler.
+- The `Play Audio File` processing algorithm, also works within the graphic modeler.
+- The `Say Some Text` processing algorithm, also works within the graphic modeler.
 
 
 ### Supported Events

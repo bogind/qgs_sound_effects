@@ -6,7 +6,7 @@
 name=QGIS Sound Effects
 qgisMinimumVersion=3.32
 description=Add sound effects to QGIS to make work less boring
-version=0.2.2
+version=0.3
 author=Dror Bogin
 email=dror.bogin@gmail.com
 
@@ -21,6 +21,13 @@ repository=https://github.com/bogind/qgs_sound_effects
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+    2024-07-28 Version 0.3
+        - Added `Play Audio File` processing algorithm that allows you to play local audio files
+            - This algorithm uses your system's audio player, so supported formats can vary.
+        - Added `Say Some Text` processing algorithm that allows you to play text-to-speech audio
+            - This algorithm uses your system's text-to-speech engine, so supported languages, locales and voices will vary.
+            - Currently only tested on Windows 11 with Microsoft Speech API (SAPI) 5.3 - https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ms723627(v=vs.85)
+            - Currently only allows the user to select the voice and the volume.
     2024-07-23 Version 0.2.2:
         - bug fix:
             - Fixed non-zoom canvas events from not being triggered off on global disable
@@ -48,7 +55,7 @@ hasProcessingProvider=yes
 
 
 # Tags are comma separated with spaces allowed
-tags=python,sound effects,sounds,effects,silly
+tags=python,sound effects,sounds,effects,silly,audio,text-to-speech
 
 homepage=https://github.com/bogind/qgs_sound_effects
 category=Plugins
