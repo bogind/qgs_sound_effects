@@ -36,7 +36,7 @@ from qgis.PyQt.QtGui import QIcon
 
 MESSAGE_CATEGORY = 'QGIS Sound Effects'
 
-class PlaySoundAlgorithm(QgsProcessingAlgorithm):
+class PlaySoundEffectAlgorithm(QgsProcessingAlgorithm):
     
     
     SOUND = 'SOUND'
@@ -134,7 +134,7 @@ class PlaySoundAlgorithm(QgsProcessingAlgorithm):
             
     
     def createInstance(self):
-        return PlaySoundAlgorithm()
+        return PlaySoundEffectAlgorithm()
     
 class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
     """This algorithm uses the PyQt5 QTextToSpeech class and your Operating System's native text-to-speech engine to say some text.
@@ -321,5 +321,6 @@ class QgisSoundEffectsProvider(QgsProcessingProvider):
         pass
     
     def loadAlgorithms(self):
+        self.addAlgorithm(PlaySoundEffectAlgorithm())
         self.addAlgorithm(SaySomeTextAlgorithm())
     
