@@ -227,7 +227,7 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
             QgsMessageLog.logMessage('Say Task "{name}" was completed'.format(name=self.description()), Qgis.Info)
             self.engine.say(self.text_to_say)
             self.finished.emit()
-        elif state == QTextToSpeech.State.Error:
+        elif state == QTextToSpeech.State.BackendError:
             QgsMessageLog.logMessage('Say Task "{name}" failed'.format(name=self.description()), Qgis.Info)
             self.error.emit()
         elif state == QTextToSpeech.State.Speaking:
@@ -254,7 +254,6 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
         
         self.engine.setVolume(float(self.play_volume))
 
-        feedback.pushInfo('Saying text: {} with voice: {} at volume {}'.format(self.text_to_say, self.voice_choices[self.selected_voice], self.play_volume))    
         return super().prepareAlgorithm(parameters, context, feedback)
     
     @staticmethod
@@ -281,6 +280,7 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
         try:
+            self.engine.say(self.text_to_say)
             self.task = QgsTask.fromFunction('Say Task', self.speak, on_finished=self.task_finished, text_to_say=self.text_to_say, engine=self.engine, voice=self.voices[self.selected_voice], volume=self.play_volume)
 
             QgsApplication.taskManager().addTask(self.task)
