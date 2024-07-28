@@ -26,11 +26,15 @@ import json
 import os
 from qgis.PyQt.QtCore import QCoreApplication, QUrl
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtTextToSpeech import QTextToSpeech, QVoice
 from qgis.core import (QgsProcessingProvider, QgsProcessingAlgorithm, 
-                        QgsProcessingParameterNumber,QgsProcessingParameterEnum)
+                        QgsProcessingParameterNumber,QgsProcessingParameterEnum,
+                        QgsProcessingParameterString,QgsTask, QgsApplication, Qgis,
+                        QgsMessageLog)
 
 from qgis.PyQt.QtGui import QIcon
 
+MESSAGE_CATEGORY = 'QGIS Sound Effects'
 
 class PlaySoundAlgorithm(QgsProcessingAlgorithm):
     
@@ -132,7 +136,173 @@ class PlaySoundAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return PlaySoundAlgorithm()
     
+class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
+    """This algorithm uses the PyQt5 QTextToSpeech class and your Operating System's native text-to-speech engine to say some text.
+    If you have multiple text-to-speech engines installed, the first one will be used.
+    If you have multiple voices installed, You can select the voice to use from the available voices.
+    If you have no text-to-speech engine or no voices installed, the algorithm will fail."""
+     
+    TEXT = 'TEXT'
+    VOICE = 'VOICE'
+    VOLUME = 'VOLUME'
+    OUTPUT = 'OUTPUT'
+    
+    def name(self):
+        return 'say_text'
+    
+    def displayName(self):
+        return 'Say Some Text'
+    
+    def group(self):
+        return ''
 
+    def groupId(self):
+        return ''
+    
+    def shortHelpString(self):
+        return 'Use text to speech to say input text'
+    
+    def icon(self):
+        return QIcon(':/plugins/qgs_sound_effects/qgs_effects_icon.png')
+    
+    def tr(self, string):
+        return QCoreApplication.translate('Processing', string)
+
+    def flags(self) -> QgsProcessingAlgorithm.Flags:
+        return super().flags() #| QgsProcessingAlgorithm.FlagNoThreading
+    
+    def initAlgorithm(self, config):
+        self.plugin_dir = os.path.dirname(__file__)
+        self.engine = None
+        self.engineNames = QTextToSpeech.availableEngines()
+
+        if len(self.engineNames) > 0:
+            self.engine = QTextToSpeech(self.engineNames[0])
+        else:
+            raise Exception('No text to speech engine available')
+        
+        self.engine.stateChanged.connect(self.onStateChanged)
+
+        self.voices = self.engine.availableVoices()
+        if len(self.voices) == 0:
+            raise Exception('No voices available for text to speech')
+        
+        self.voice_names = [v.name() for v in self.voices]
+        self.voice_genders = [v.genderName(v.gender()) for v in self.voices]
+        self.voice_ages = [v.ageName(v.age()) for v in self.voices]
+        self.voice_choices = ['{} - {} - {}'.format(self.voice_names[i], self.voice_genders[i], self.voice_ages[i]) for i in range(len(self.voices))]
+
+
+        text_param = QgsProcessingParameterString(
+                self.TEXT,
+                self.tr('Text'),
+                optional=False
+            )
+        voice_param = QgsProcessingParameterEnum(
+                self.VOICE,
+                self.tr('Voice'),
+                options=self.voice_choices,
+                defaultValue=self.voice_choices[0]
+            )
+
+        volume_param = QgsProcessingParameterNumber(
+                self.VOLUME,
+                self.tr('Volume'),
+                type=QgsProcessingParameterNumber.Double,
+                optional=True,
+                defaultValue=1.0,
+                maxValue=1.0,
+                minValue=0.0
+            )
+        params = [text_param, voice_param, volume_param]
+        for param in params:
+            self.addParameter(param,
+                createOutput = True)
+            
+
+    def onStateChanged(self, state):
+        QgsMessageLog.logMessage('State changed to {}'.format(state), MESSAGE_CATEGORY, Qgis.Info)
+        if state == QTextToSpeech.State.Ready:
+            QgsMessageLog.logMessage('Say Task "{name}" was completed'.format(name=self.description()), Qgis.Info)
+            self.engine.say(self.text_to_say)
+            self.finished.emit()
+        elif state == QTextToSpeech.State.Error:
+            QgsMessageLog.logMessage('Say Task "{name}" failed'.format(name=self.description()), Qgis.Info)
+            self.error.emit()
+        elif state == QTextToSpeech.State.Speaking:
+            pass
+        elif state == QTextToSpeech.State.Paused:
+            pass
+        else:
+            pass
+            
+
+    def prepareAlgorithm(self, parameters, context, feedback):
+        self.engine.stop()
+        self.selected_voice = self.parameterAsEnum(parameters, self.VOICE, context)
+        self.text_to_say = self.parameterAsString(parameters, self.TEXT, context)
+        self.play_volume = self.parameterAsDouble(parameters, self.VOLUME, context)
+
+        voice = self.voices[self.selected_voice]
+        if type(voice) is not QVoice:
+            raise Exception('Selected voice is not valid')
+
+        self.engine.setVoice(voice)
+        if self.play_volume < 0 or self.play_volume > 1:
+            raise Exception('Volume must be between 0 and 1')
+        
+        self.engine.setVolume(float(self.play_volume))
+
+        feedback.pushInfo('Saying text: {} with voice: {} at volume {}'.format(self.text_to_say, self.voice_choices[self.selected_voice], self.play_volume))    
+        return super().prepareAlgorithm(parameters, context, feedback)
+    
+    @staticmethod
+    def speak(task, text_to_say, engine, voice, volume, feedback):
+        task.setProgress(0)
+        QgsMessageLog.logMessage('Started speaking task "{}"'.format(text_to_say),
+                             MESSAGE_CATEGORY, Qgis.Info)
+        engine.setVoice(voice)
+        engine.setVolume(volume)
+        engine.stop()
+        engine.stateChanged.connect(engine.say(text_to_say))
+        engine.resume()
+        task.setProgress(100)
+        feedback.pushInfo('Finished speaking task "{}"'.format(text_to_say))
+        return True
+
+    def task_finished(context, successful, results):
+        if not successful:
+            QgsMessageLog.logMessage('Speaking Task finished unsucessfully',
+                                    MESSAGE_CATEGORY, Qgis.Warning)
+        else:
+            QgsMessageLog.logMessage('Speaking Task finished', MESSAGE_CATEGORY, Qgis.Info)
+        
+
+    def processAlgorithm(self, parameters, context, feedback):
+        try:
+            self.task = QgsTask.fromFunction('Say Task', self.speak, on_finished=self.task_finished, text_to_say=self.text_to_say, engine=self.engine, voice=self.voices[self.selected_voice], volume=self.play_volume)
+
+            QgsApplication.taskManager().addTask(self.task)
+            feedback.pushInfo('Saying text: {} with voice: {} at volume {}'.format(self.text_to_say, self.voice_choices[self.selected_voice], self.play_volume))
+    
+            return {self.OUTPUT:{
+            'TEXT': self.text_to_say,
+            'VOICE': self.voice_choices[self.selected_voice], 
+            'VOLUME': self.play_volume, 
+            'OUTPUT': 'Played Sound Effect'}
+            }
+
+        except Exception as e:
+            return {self.OUTPUT: 'Failed to say something', 'ERROR': str(e)}
+        
+    
+    def postProcessAlgorithm(self, context, feedback):
+        return super().postProcessAlgorithm(context, feedback)
+            
+    
+    def createInstance(self):
+        return SaySomeTextAlgorithm()
+    
 
 class QgisSoundEffectsProvider(QgsProcessingProvider):
     def __init__(self):
@@ -151,5 +321,5 @@ class QgisSoundEffectsProvider(QgsProcessingProvider):
         pass
     
     def loadAlgorithms(self):
-        self.addAlgorithm(PlaySoundAlgorithm())
+        self.addAlgorithm(SaySomeTextAlgorithm())
     
