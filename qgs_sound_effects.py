@@ -25,7 +25,7 @@
 import json
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QTimer, QDateTime, QUrl, QMetaMethod
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QCheckBox, QToolButton, QComboBox, QDoubleSpinBox
+from qgis.PyQt.QtWidgets import QAction, QCheckBox, QToolButton, QComboBox, QDoubleSpinBox, QSpinBox
 from qgis.gui import QgsGui
 from qgis.core import QgsSettings, QgsApplication, QgsMessageLog, Qgis
 from PyQt5.QtMultimedia import QSoundEffect
@@ -166,8 +166,10 @@ class QgisSoundEffects:
                 eventConfig = self.config.get(event, {})
                 soundID = eventConfig.get('sound', 'success')
                 volume = eventConfig.get('volume', 1.0)
+                loops = eventConfig.get('loops', 0)
                 self.bound_sounds[event].setSource(self.sound_effects[soundID].source())
                 self.bound_sounds[event].setVolume(volume)
+                self.bound_sounds[event].setLoopCount(loops)
         except Exception as e:
             self.mb.pushCritical('Error configuring sound effects plugin', str(e))
 
@@ -475,36 +477,48 @@ class QgisSoundEffects:
         self.volume_ids = ['processingSuccessVolume','processingFailureVolume','zoomInVolume',
                         'zoomOutVolume','layersChangedVolume','renderCompleteVolume','renderErrorOccurredVolume',
                         'mapExportCompleteVolume','mapExportErrorVolume','printLayoutExportSuccessVolume']
+        self.loop_ids = ['processingSuccessLoopSpinbox','processingFailureLoopSpinbox','zoomInLoopSpinbox',
+                         'zoomOutLoopSpinbox','layersChangedLoopSpinbox','renderCompleteLoopSpinbox','renderErrorOccurredLoopSpinbox',
+                        'mapExportCompleteLoopSpinbox','mapExportErrorLoopSpinbox','printLayoutExportSuccessLoopSpinbox']
         
         
         for i in range(0, len(self.checkbox_ids)):
-            eventID = self.objectid_to_eventid(self.checkbox_ids[i])
-            eventConfig = self.config.get(eventID, {})
+            try:
+                eventID = self.objectid_to_eventid(self.checkbox_ids[i])
+                eventConfig = self.config.get(eventID, {})
 
-            checkbox_id = self.checkbox_ids[i]
-            checkbox = self.config_window.findChild(QCheckBox, checkbox_id)
-            checked = eventConfig.get('enabled', False)
-            checkbox.setChecked(checked)
-            checkbox.stateChanged.connect(self.make_toggle_event(checkbox_id))
+                checkbox_id = self.checkbox_ids[i]
+                checkbox = self.config_window.findChild(QCheckBox, checkbox_id)
+                checked = eventConfig.get('enabled', False)
+                checkbox.setChecked(checked)
+                checkbox.stateChanged.connect(self.make_toggle_event(checkbox_id))
 
-            combobox_id = self.combobox_ids[i]
-            comboBox = self.config_window.findChild(QComboBox, combobox_id)
-            for j in self.sounds_config.keys():
-                comboBox.addItem(self.sounds_config[j]['label'], j)
+                combobox_id = self.combobox_ids[i]
+                comboBox = self.config_window.findChild(QComboBox, combobox_id)
+                for j in self.sounds_config.keys():
+                    comboBox.addItem(self.sounds_config[j]['label'], j)
 
-            eventSoundIndex = eventConfig.get('sound_index', 0)
-            
-            comboBox.setCurrentIndex(eventSoundIndex)
-            comboBox.currentIndexChanged.connect(self.make_set_event_sound(combobox_id))
-            
-            test_button_id = self.test_button_ids[i]
-            test_button = self.config_window.findChild(QToolButton, test_button_id)
-            test_button.clicked.connect(self.make_test_sound(combobox_id))
+                eventSoundIndex = eventConfig.get('sound_index', 0)
+                
+                comboBox.setCurrentIndex(eventSoundIndex)
+                comboBox.currentIndexChanged.connect(self.make_set_event_sound(combobox_id))
+                
+                test_button_id = self.test_button_ids[i]
+                test_button = self.config_window.findChild(QToolButton, test_button_id)
+                test_button.clicked.connect(self.make_test_sound(combobox_id))
 
-            volume_id = self.volume_ids[i]
-            volume = self.config_window.findChild(QDoubleSpinBox, volume_id)
-            configVolume = eventConfig.get('volume', 1.0)
-            volume.setValue(configVolume)
+                volume_id = self.volume_ids[i]
+                volume = self.config_window.findChild(QDoubleSpinBox, volume_id)
+                configVolume = eventConfig.get('volume', 1.0)
+                volume.setValue(configVolume)
+                
+                loop_id = self.loop_ids[i]
+                loop = self.config_window.findChild(QSpinBox, loop_id)
+                configLoop = eventConfig.get('loops', 0)
+                loop.setValue(configLoop)
+            except Exception as e:
+                QgsMessageLog.logMessage('Error configuring settings window: {}'.format(str(e)), MESSAGE_CATEGORY, Qgis.Critical)
+                QgsMessageLog.logMessage(str(e.__traceback__), MESSAGE_CATEGORY, Qgis.Critical)
 
         self.config_window.saveSettingsButton.clicked.connect(self.save_settings)
         self.config_window.cancelChangesButton.clicked.connect(self.config_window.hide)
@@ -536,7 +550,7 @@ class QgisSoundEffects:
     def restore_settings(self):
         try:
             self.enabled = self.get_setting('enabled', True)
-            default_config = '{"layersChanged": {"enabled": false, "sound": "woodenfrog", "sound_index": 10, "volume": 1.0}, "processingFailure": {"enabled": true, "sound": "fail", "sound_index": 0, "volume": 1.0}, "processingSuccess": {"enabled": true, "sound": "success", "sound_index": 1, "volume": 1.0}, "renderComplete": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0}, "renderErrorOccurred": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0}, "zoomIn": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0}, "zoomOut": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0}, "mapExportComplete": {"enabled": false, "sound": "good_answer_harp", "sound_index": 12, "volume": 1.0}, "mapExportError": {"enabled": false, "sound": "sad_trombone", "sound_index": 14, "volume": 1.0}, "printLayoutExportSuccess": {"enabled": false, "sound": "tada", "sound_index": 13, "volume": 1.0}}'
+            default_config = '{"layersChanged": {"enabled": false, "sound": "woodenfrog", "sound_index": 10, "volume": 1.0, "loops": 0}, "processingFailure": {"enabled": true, "sound": "fail", "sound_index": 0, "volume": 1.0, "loops": 0}, "processingSuccess": {"enabled": true, "sound": "success", "sound_index": 1, "volume": 1.0, "loops": 0}, "renderComplete": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0, "loops": 0}, "renderErrorOccurred": {"enabled": false, "sound": "fail", "sound_index": 0, "volume": 1.0, "loops": 0}, "zoomIn": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0, "loops": 0}, "zoomOut": {"enabled": false, "sound": "synth-glide", "sound_index": 6, "volume": 1.0, "loops": 0}, "mapExportComplete": {"enabled": false, "sound": "good_answer_harp", "sound_index": 12, "volume": 1.0, "loops": 0}, "mapExportError": {"enabled": false, "sound": "sad_trombone", "sound_index": 14, "volume": 1.0, "loops": 0}, "printLayoutExportSuccess": {"enabled": false, "sound": "tada", "sound_index": 13, "volume": 1.0}}'
             config = json.loads(self.get_setting('config', default_config))
             return config
         except Exception as e:
@@ -556,16 +570,18 @@ class QgisSoundEffects:
                 combobox_id = self.combobox_ids[i]
                 comboBox = self.config_window.findChild(QComboBox, combobox_id)
                 
-                
-
                 volume_id = self.volume_ids[i]
                 volume = self.config_window.findChild(QDoubleSpinBox, volume_id)
+
+                loop_id = self.loop_ids[i]
+                loop = self.config_window.findChild(QSpinBox, loop_id)
                 
                 event = {
                     'enabled': checked,
                     'sound': comboBox.currentData(),
                     'sound_index': comboBox.currentIndex(),
-                    'volume': volume.value()
+                    'volume': volume.value(),
+                    'loops': loop.value()
                 }
                 self.config[eventID] = event
                 

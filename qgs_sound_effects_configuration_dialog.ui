@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>484</width>
+    <width>518</width>
     <height>461</height>
    </rect>
   </property>
@@ -50,7 +50,7 @@
   <widget class="QPushButton" name="saveSettingsButton">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>350</x>
      <y>420</y>
      <width>75</width>
      <height>23</height>
@@ -63,7 +63,7 @@
   <widget class="QPushButton" name="cancelChangesButton">
    <property name="geometry">
     <rect>
-     <x>390</x>
+     <x>430</x>
      <y>420</y>
      <width>75</width>
      <height>23</height>
@@ -77,9 +77,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>60</y>
-     <width>461</width>
-     <height>324</height>
+     <y>63</y>
+     <width>491</width>
+     <height>341</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="eventsGrid">
@@ -252,9 +252,6 @@
       </property>
      </widget>
     </item>
-    <item row="5" column="2">
-     <widget class="QComboBox" name="layersChangedComboBox"/>
-    </item>
     <item row="10" column="3">
      <widget class="QToolButton" name="printLayoutExportSuccessTestButton">
       <property name="text">
@@ -265,6 +262,9 @@
         <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
       </property>
      </widget>
+    </item>
+    <item row="5" column="2">
+     <widget class="QComboBox" name="layersChangedComboBox"/>
     </item>
     <item row="9" column="1">
      <widget class="QCheckBox" name="mapExportErrorCheckBox">
@@ -483,6 +483,49 @@
         <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
       </property>
      </widget>
+    </item>
+    <item row="1" column="5">
+     <widget class="QSpinBox" name="processingSuccessLoopSpinbox"/>
+    </item>
+    <item row="0" column="5">
+     <widget class="QLabel" name="loopsTitle">
+      <property name="toolTip">
+       <string>0 or 1 means the sound will be played only once</string>
+      </property>
+      <property name="whatsThis">
+       <string>0 or 1 means the sound will be played only once</string>
+      </property>
+      <property name="text">
+       <string>Loops</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="5">
+     <widget class="QSpinBox" name="processingFailureLoopSpinbox"/>
+    </item>
+    <item row="3" column="5">
+     <widget class="QSpinBox" name="zoomInLoopSpinbox"/>
+    </item>
+    <item row="4" column="5">
+     <widget class="QSpinBox" name="zoomOutLoopSpinbox"/>
+    </item>
+    <item row="5" column="5">
+     <widget class="QSpinBox" name="layersChangedLoopSpinbox"/>
+    </item>
+    <item row="6" column="5">
+     <widget class="QSpinBox" name="renderCompleteLoopSpinbox"/>
+    </item>
+    <item row="7" column="5">
+     <widget class="QSpinBox" name="renderErrorOccurredLoopSpinbox"/>
+    </item>
+    <item row="8" column="5">
+     <widget class="QSpinBox" name="mapExportCompleteLoopSpinbox"/>
+    </item>
+    <item row="9" column="5">
+     <widget class="QSpinBox" name="mapExportErrorLoopSpinbox"/>
+    </item>
+    <item row="10" column="5">
+     <widget class="QSpinBox" name="printLayoutExportSuccessLoopSpinbox"/>
     </item>
    </layout>
   </widget>
