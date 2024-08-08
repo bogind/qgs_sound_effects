@@ -2,497 +2,26 @@
 <ui version="4.0">
  <class>QGSSoundEffectsSettings</class>
  <widget class="QWidget" name="QGSSoundEffectsSettings">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>468</width>
-    <height>414</height>
+    <width>484</width>
+    <height>461</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
-  <widget class="QWidget" name="verticalLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>70</y>
-     <width>441</width>
-     <height>271</height>
-    </rect>
-   </property>
-   <layout class="QVBoxLayout" name="SettingsForm">
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_4">
-      <item>
-       <widget class="QCheckBox" name="processingSuccessCheckBox">
-        <property name="text">
-         <string>Processing Success</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
-        <item>
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Sound Effect</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="processingSuccessComboBox"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QToolButton" name="processingSuccessTestButton">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
-        <property name="leftMargin">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Volume</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="processingSuccessVolume">
-          <property name="maximum">
-           <double>1.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_16">
-      <item>
-       <widget class="QCheckBox" name="processingFailureCheckBox">
-        <property name="text">
-         <string>Processing Failure</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_17">
-        <item>
-         <widget class="QLabel" name="label_12">
-          <property name="text">
-           <string>Sound Effect</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="processingFailureComboBox"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QToolButton" name="processingFailureTestButton">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_18">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="sizeConstraint">
-         <enum>QLayout::SetMinAndMaxSize</enum>
-        </property>
-        <property name="leftMargin">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_13">
-          <property name="text">
-           <string>Volume</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="processingFailureVolume">
-          <property name="maximum">
-           <double>1.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_19">
-      <item>
-       <widget class="QCheckBox" name="zoomInCheckBox">
-        <property name="text">
-         <string>Zoom In</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_20">
-        <item>
-         <widget class="QLabel" name="label_14">
-          <property name="text">
-           <string>Sound Effect</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="zoomInComboBox"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QToolButton" name="zoomInTestButton">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_21">
-        <property name="leftMargin">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_15">
-          <property name="text">
-           <string>Volume</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="zoomInVolume">
-          <property name="maximum">
-           <double>1.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QCheckBox" name="zoomOutCheckBox">
-        <property name="text">
-         <string>Zoom Out</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Sound Effect</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="zoomOutComboBox"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QToolButton" name="zoomOutTestButton">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <property name="leftMargin">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Volume</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="zoomOutVolume">
-          <property name="maximum">
-           <double>1.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_7">
-      <item>
-       <widget class="QCheckBox" name="layersChangedCheckBox">
-        <property name="text">
-         <string>Layers Changed</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <item>
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>Sound Effect</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="layersChangedComboBox"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QToolButton" name="layersChangedTestButton">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
-        <property name="leftMargin">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_7">
-          <property name="text">
-           <string>Volume</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="layersChangedVolume">
-          <property name="maximum">
-           <double>1.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_10">
-      <item>
-       <widget class="QCheckBox" name="renderCompleteCheckBox">
-        <property name="text">
-         <string>Render Complete</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_11">
-        <item>
-         <widget class="QLabel" name="label_8">
-          <property name="text">
-           <string>Sound Effect</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="renderCompleteComboBox"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QToolButton" name="renderCompleteTestButton">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_12">
-        <property name="leftMargin">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_9">
-          <property name="text">
-           <string>Volume</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="renderCompleteVolume">
-          <property name="maximum">
-           <double>1.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_13">
-      <item>
-       <widget class="QCheckBox" name="renderErrorOccurredCheckBox">
-        <property name="text">
-         <string>Render Error</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_14">
-        <item>
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>Sound Effect</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="renderErrorOccurredComboBox"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QToolButton" name="renderErrorOccurredTestButton">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_15">
-        <property name="leftMargin">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_11">
-          <property name="text">
-           <string>Volume</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="renderErrorOccurredVolume">
-          <property name="maximum">
-           <double>1.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-   </layout>
-  </widget>
+  <property name="windowTitle">
+   <string>Sound Effects Settings</string>
+  </property>
   <widget class="QLabel" name="FormTitle">
    <property name="geometry">
     <rect>
@@ -521,8 +50,8 @@
   <widget class="QPushButton" name="saveSettingsButton">
    <property name="geometry">
     <rect>
-     <x>300</x>
-     <y>350</y>
+     <x>310</x>
+     <y>420</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -534,8 +63,8 @@
   <widget class="QPushButton" name="cancelChangesButton">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>350</y>
+     <x>390</x>
+     <y>420</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -543,6 +72,456 @@
    <property name="text">
     <string>Cancel</string>
    </property>
+  </widget>
+  <widget class="QWidget" name="gridLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>60</y>
+     <width>461</width>
+     <height>324</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="eventsGrid">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
+    </property>
+    <item row="1" column="2">
+     <widget class="QComboBox" name="processingSuccessComboBox"/>
+    </item>
+    <item row="0" column="4">
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Volume</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="3">
+     <widget class="QToolButton" name="zoomOutTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QComboBox" name="processingFailureComboBox"/>
+    </item>
+    <item row="6" column="4">
+     <widget class="QDoubleSpinBox" name="renderCompleteVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QCheckBox" name="layersChangedCheckBox">
+      <property name="text">
+       <string>Layers Changed</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="1">
+     <widget class="QCheckBox" name="renderErrorOccurredCheckBox">
+      <property name="text">
+       <string>Render Error</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QCheckBox" name="processingFailureCheckBox">
+      <property name="text">
+       <string>Processing Failure</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QCheckBox" name="zoomOutCheckBox">
+      <property name="text">
+       <string>Zoom Out</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="4">
+     <widget class="QDoubleSpinBox" name="renderErrorOccurredVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="2">
+     <widget class="QComboBox" name="renderErrorOccurredComboBox"/>
+    </item>
+    <item row="10" column="1">
+     <widget class="QCheckBox" name="printLayoutExportSuccessCheckBox">
+      <property name="text">
+       <string>Print Layout Exported</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="4">
+     <widget class="QDoubleSpinBox" name="zoomOutVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="4">
+     <widget class="QDoubleSpinBox" name="layersChangedVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="4">
+     <widget class="QDoubleSpinBox" name="zoomInVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="2">
+     <widget class="QComboBox" name="renderCompleteComboBox"/>
+    </item>
+    <item row="4" column="2">
+     <widget class="QComboBox" name="zoomOutComboBox"/>
+    </item>
+    <item row="3" column="2">
+     <widget class="QComboBox" name="zoomInComboBox"/>
+    </item>
+    <item row="8" column="1">
+     <widget class="QCheckBox" name="mapExportCompleteCheckBox">
+      <property name="text">
+       <string>Map Export Complete</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QCheckBox" name="processingSuccessCheckBox">
+      <property name="text">
+       <string>Processing Success</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_12">
+      <property name="text">
+       <string>Event</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Sound Effect</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QToolButton" name="processingSuccessTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="4">
+     <widget class="QDoubleSpinBox" name="processingFailureVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="1">
+     <widget class="QCheckBox" name="printLayoutExportErrorCheckBox">
+      <property name="text">
+       <string>Print Layout Export Error</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="2">
+     <widget class="QComboBox" name="layersChangedComboBox"/>
+    </item>
+    <item row="0" column="3">
+     <widget class="QLabel" name="label_14">
+      <property name="text">
+       <string>Test</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="3">
+     <widget class="QToolButton" name="layersChangedTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QToolButton" name="processingFailureTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QCheckBox" name="zoomInCheckBox">
+      <property name="text">
+       <string>Zoom In</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
+     <widget class="QDoubleSpinBox" name="processingSuccessVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="3">
+     <widget class="QToolButton" name="renderErrorOccurredTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QCheckBox" name="renderCompleteCheckBox">
+      <property name="text">
+       <string>Render Complete</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="1">
+     <widget class="QCheckBox" name="mapExportErrorCheckBox">
+      <property name="text">
+       <string>Map Export Error</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="3">
+     <widget class="QToolButton" name="renderCompleteTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="3">
+     <widget class="QToolButton" name="zoomInTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="2">
+     <widget class="QComboBox" name="mapExportCompleteComboBox"/>
+    </item>
+    <item row="8" column="3">
+     <widget class="QToolButton" name="mapExportCompleteTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="4">
+     <widget class="QDoubleSpinBox" name="mapExportCompleteVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="2">
+     <widget class="QComboBox" name="mapExportErrorComboBox"/>
+    </item>
+    <item row="9" column="3">
+     <widget class="QToolButton" name="mapExportErrorTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="4">
+     <widget class="QDoubleSpinBox" name="mapExportErrorVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="2">
+     <widget class="QComboBox" name="printLayoutExportSuccessComboBox"/>
+    </item>
+    <item row="10" column="3">
+     <widget class="QToolButton" name="printLayoutExportSuccessTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="4">
+     <widget class="QDoubleSpinBox" name="printLayoutExportSuccessVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="4">
+     <widget class="QDoubleSpinBox" name="printLayoutExportErrorVolume">
+      <property name="maximum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="3">
+     <widget class="QToolButton" name="printLayoutExportErrorTestButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>volume_icon.png</normaloff>volume_icon.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="2">
+     <widget class="QComboBox" name="printLayoutExportErrorComboBox"/>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

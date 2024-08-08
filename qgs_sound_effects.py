@@ -155,7 +155,11 @@ class QgisSoundEffects:
                 'zoomOut': QSoundEffect(),
                 'layersChanged': QSoundEffect(),
                 'renderComplete': QSoundEffect(),
-                'renderErrorOccurred': QSoundEffect()
+                'renderErrorOccurred': QSoundEffect(),
+                'mapExportComplete': QSoundEffect(),
+                'mapExportError': QSoundEffect(),
+                'printLayoutExportSuccess': QSoundEffect(),
+                'printLayoutExportError': QSoundEffect(),
             }
             for event in self.bound_sounds.keys():
                 eventConfig = self.config.get(event, {})
@@ -167,6 +171,7 @@ class QgisSoundEffects:
             self.mb.pushCritical('Error configuring sound effects plugin', str(e))
 
         self.toggle_canvas_events()
+        self.toggle_export_events()
         
     
     def toggle_canvas_events(self):
@@ -242,6 +247,27 @@ class QgisSoundEffects:
                 # This will happen if the event was not connected
                 pass
 
+    def toggle_export_events(self):
+        try:
+            if self.enabled is True:
+                config  = self.config.get('printLayoutExportSuccess', {})
+                enabled = config.get('enabled', False)
+                if enabled is True:
+                    self.iface.layoutDesignerOpened.connect(self.attachLayoutDesignerExportSuccessListener)
+                else:
+                    self.iface.layoutDesignerOpened.connect(self.disconnectLayoutDesignerExportSuccessListener)
+            else:
+                pass
+        except Exception as e:
+            self.mb.pushCritical('Error toggling export events', str(e))
+
+    
+    def attachLayoutDesignerExportSuccessListener(self, designer):
+        designer.layoutExported.connect(self.bound_sounds['printLayoutExportSuccess'].play)
+
+    def disconnectLayoutDesignerExportSuccessListener(self, designer):
+        designer.layoutExported.disconnect(self.bound_sounds['printLayoutExportSuccess'].play)
+        self.iface.layoutDesignerOpened.disconnect(self.disconnectLayoutDesignerExportSuccessListener)
 
     def onScaleChanged(self, scale): 
         previousScale = self.previousScale
@@ -373,13 +399,17 @@ class QgisSoundEffects:
         
     def configure_settings_window(self):
         self.checkbox_ids = ['processingSuccessCheckBox', 'processingFailureCheckBox', 'zoomInCheckBox',
-                        'zoomOutCheckBox','layersChangedCheckBox','renderCompleteCheckBox','renderErrorOccurredCheckBox']
+                        'zoomOutCheckBox','layersChangedCheckBox','renderCompleteCheckBox','renderErrorOccurredCheckBox',
+                        'mapExportCompleteCheckBox','mapExportErrorCheckBox','printLayoutExportSuccessCheckBox','printLayoutExportErrorCheckBox']
         self.combobox_ids = ['processingSuccessComboBox','processingFailureComboBox','zoomInComboBox',
-                        'zoomOutComboBox','layersChangedComboBox','renderCompleteComboBox','renderErrorOccurredComboBox']
+                        'zoomOutComboBox','layersChangedComboBox','renderCompleteComboBox','renderErrorOccurredComboBox',
+                        'mapExportCompleteComboBox','mapExportErrorComboBox','printLayoutExportSuccessComboBox','printLayoutExportErrorComboBox']
         self.test_button_ids = ['processingSuccessTestButton','processingFailureTestButton','zoomInTestButton',
-                        'zoomOutTestButton','layersChangedTestButton','renderCompleteTestButton','renderErrorOccurredTestButton']
+                        'zoomOutTestButton','layersChangedTestButton','renderCompleteTestButton','renderErrorOccurredTestButton',
+                        'mapExportCompleteTestButton','mapExportErrorTestButton','printLayoutExportSuccessTestButton','printLayoutExportErrorTestButton']
         self.volume_ids = ['processingSuccessVolume','processingFailureVolume','zoomInVolume',
-                        'zoomOutVolume','layersChangedVolume','renderCompleteVolume','renderErrorOccurredVolume']
+                        'zoomOutVolume','layersChangedVolume','renderCompleteVolume','renderErrorOccurredVolume',
+                        'mapExportCompleteVolume','mapExportErrorVolume','printLayoutExportSuccessVolume','printLayoutExportErrorVolume']
         
         
         for i in range(0, len(self.checkbox_ids)):
@@ -532,6 +562,7 @@ class QgisSoundEffects:
         self.set_setting('enabled', self.enabled)
         self.update_last_entry()
         self.toggle_canvas_events()
+        self.toggle_export_events()
         if self.enabled is True:
             self.timer.start(1000)            
         else:
