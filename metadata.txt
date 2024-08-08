@@ -6,7 +6,7 @@
 name=QGIS Sound Effects
 qgisMinimumVersion=3.32
 description=Add sound effects to QGIS to make work less boring
-version=0.3
+version=0.4
 author=Dror Bogin
 email=dror.bogin@gmail.com
 
@@ -21,6 +21,12 @@ repository=https://github.com/bogind/qgs_sound_effects
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+    2024-08-08 Version 0.4
+        - Added events:
+            - Print Layout export - for those high resolution exports that take forever (There is no error event for this one)
+            - Map Export Complete/Error - For the same reason, but when you export without a print Layout
+        - Restrcutured the settings dialog to be more user friendly
+        - Added looping option for event sound effects
     2024-07-28 Version 0.3
         - Added `Play Audio File` processing algorithm that allows you to play local audio files
             - This algorithm uses your system's audio player, so supported formats can vary.

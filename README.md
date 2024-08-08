@@ -27,9 +27,13 @@ Currently supported actions are:
 - Render Error - when the map canvas fails to render correctly.
 - Zoom In - when the user zooms in the map canvas.
 - Zoom Out - when the user zooms out the map canvas.
+- Map Export Complete - when the user exports the map via the `Project` Menu -> `Import/Export` -> `Export Map to Image/PDF`.
+- Map Export Error - when the above raises an error.
+- Print Layout Exported - when a print layout export is finished (There is no error event for this).
 
 > [!NOTE]
 > Yes, there is a plan to split the `Layers Changed` event into `Layer Added` and `Layer Removed` events in the future.
+> You can look at the current [open issues](https://github.com/bogind/qgs_sound_effects/issues) to see what is planned for the future.
 
 ### Installation
 
