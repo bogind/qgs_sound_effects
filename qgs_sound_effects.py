@@ -23,11 +23,11 @@
 """
 
 import json
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QTimer, QDateTime, QUrl
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QTimer, QDateTime, QUrl, QMetaMethod
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QCheckBox, QToolButton, QComboBox, QDoubleSpinBox
 from qgis.gui import QgsGui
-from qgis.core import QgsSettings, QgsApplication
+from qgis.core import QgsSettings, QgsApplication, QgsMessageLog, Qgis
 from PyQt5.QtMultimedia import QSoundEffect
 
 # Initialize Qt resources from file resources.py
@@ -37,6 +37,7 @@ from .qgs_sound_effects_provider import QgisSoundEffectsProvider
 from .qgs_sound_effects_dialog import QgisSoundEffectsDialog, QgisSoundEffectsConfigDialog
 import os.path
 
+MESSAGE_CATEGORY = 'QGIS Sound Effects'
 
 class QgisSoundEffects:
     """QGIS Plugin Implementation."""
@@ -73,6 +74,7 @@ class QgisSoundEffects:
         self.last_entry = None
         self.actions = []
         self.previousScale = self.iface.mapCanvas().scale()
+        self.taskManager = QgsApplication.taskManager()
         self.config = self.restore_settings()
         self.menu = self.tr(u'&QGIS Sound Effects')
         with open(os.path.join(self.plugin_dir,'sounds.json')) as f:
@@ -256,10 +258,37 @@ class QgisSoundEffects:
                     self.iface.layoutDesignerOpened.connect(self.attachLayoutDesignerExportSuccessListener)
                 else:
                     self.iface.layoutDesignerOpened.connect(self.disconnectLayoutDesignerExportSuccessListener)
+
+                # map export complete
+                config  = self.config.get('mapExportComplete', {})
+                enabled = config.get('enabled', False)
+                if enabled is True:
+                    self.taskManager.taskAdded.connect(self.mapExportSuccessTaskListener)
+                else:
+                    try:
+                        self.taskManager.taskAdded.disconnect(self.mapExportSuccessTaskListener)
+                    except Exception as e: # noqa: F841
+                        # This will happen if the event was not connected
+                        pass
+
+                # map export error
+                config  = self.config.get('mapExportError', {})
+                enabled = config.get('enabled', False)
+                if enabled is True:
+                    self.taskManager.taskAdded.connect(self.mapExportErrorTaskListener)
+                else:
+                    try:
+                        self.taskManager.taskAdded.disconnect(self.mapExportErrorTaskListener)
+                    except Exception as e: # noqa: F841
+                        # This will happen if the event was not connected
+                        pass
+
             else:
                 pass
         except Exception as e:
             self.mb.pushCritical('Error toggling export events', str(e))
+            QgsMessageLog.logMessage('Error toggling export events: {}'.format(e), MESSAGE_CATEGORY, Qgis.Critical)
+            QgsMessageLog.logMessage(str(e.__traceback__), MESSAGE_CATEGORY, Qgis.Critical)
 
     
     def attachLayoutDesignerExportSuccessListener(self, designer):
@@ -268,6 +297,34 @@ class QgisSoundEffects:
     def disconnectLayoutDesignerExportSuccessListener(self, designer):
         designer.layoutExported.disconnect(self.bound_sounds['printLayoutExportSuccess'].play)
         self.iface.layoutDesignerOpened.disconnect(self.disconnectLayoutDesignerExportSuccessListener)
+
+    def mapExportSuccessTaskListener(self, taskId):
+        task = self.taskManager.task(taskId)
+        if(self.iface.tr("Saving as image") == task.description() or self.iface.tr("Saving as PDF") == task.description()):
+            #task.taskCompleted.connect(self.bound_sounds['mapExportComplete'].play)
+            for i in range (task.metaObject().methodCount()):
+                method = task.metaObject().method(i)
+                if not method.isValid():
+                    continue
+                if method.methodType() == QMetaMethod.Signal:
+                    if method.name() == 'renderingComplete':
+                        task.renderingComplete.connect(self.bound_sounds['mapExportComplete'].play)
+        else:
+            pass
+
+    def mapExportErrorTaskListener(self, taskId):
+        task = self.taskManager.task(taskId)
+        if(self.iface.tr("Saving as image") == task.description() or self.iface.tr("Saving as PDF") == task.description()):
+            for i in range (task.metaObject().methodCount()):
+                method = task.metaObject().method(i)
+                if not method.isValid():
+                    continue
+                if method.methodType() == QMetaMethod.Signal:
+                    if method.name() == 'errorOccurred':
+                        task.errorOccurred.connect(self.bound_sounds['mapExportError'].play)
+        else:
+            pass
+
 
     def onScaleChanged(self, scale): 
         previousScale = self.previousScale
@@ -286,8 +343,8 @@ class QgisSoundEffects:
                     if zoomOutEnabled is True:
                         self.bound_sounds['zoomOut'].play()
                 else:
-                    # why would this happen?
-                    print('Scale did not change')    
+                    # Happens when window is resized, QGIS retains scale
+                    pass
         
         self.previousScale = scale
 
@@ -475,7 +532,7 @@ class QgisSoundEffects:
             config = json.loads(self.get_setting('config', default_config))
             return config
         except Exception as e:
-            print('Error restoring settings: {}'.format(str(e)))
+            QgsMessageLog.logMessage('Error restoring settings: {}'.format(str(e)), MESSAGE_CATEGORY, Qgis.Critical)
             return {}
     
 
@@ -507,7 +564,7 @@ class QgisSoundEffects:
             self.set_setting('config', json.dumps(self.config))
             self.configure()
         except Exception as e:
-            print('Error saving settings: {}'.format(str(e)))
+            QgsMessageLog.logMessage('Error saving settings: {}'.format(str(e)), MESSAGE_CATEGORY, Qgis.Critical)
             
         self.config_window.hide()
 
