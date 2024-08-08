@@ -25,7 +25,7 @@ hasProcessingProvider=yes
         - Added events:
             - Print Layout export - for those high resolution exports that take forever (There is no error event for this one)
             - Map Export Complete/Error - For the same reason, but when you export without a print Layout
-        - Restrcutured the settings dialog to be more user friendly
+        - Restructured the settings dialog to be more user friendly
         - Added looping option for event sound effects
     2024-07-28 Version 0.3
         - Added `Play Audio File` processing algorithm that allows you to play local audio files
