@@ -295,8 +295,16 @@ class QgisSoundEffects:
         designer.layoutExported.connect(self.bound_sounds['printLayoutExportSuccess'].play)
 
     def disconnectLayoutDesignerExportSuccessListener(self, designer):
-        designer.layoutExported.disconnect(self.bound_sounds['printLayoutExportSuccess'].play)
-        self.iface.layoutDesignerOpened.disconnect(self.disconnectLayoutDesignerExportSuccessListener)
+        try:
+            designer.layoutExported.disconnect(self.bound_sounds['printLayoutExportSuccess'].play)
+        except Exception as e: # noqa: F841
+            # This will happen if the event was not connected
+            pass
+        try:
+            self.iface.layoutDesignerOpened.disconnect(self.disconnectLayoutDesignerExportSuccessListener)
+        except Exception as e: # noqa: F841
+            # This will happen if the event was not connected
+            pass
 
     def mapExportSuccessTaskListener(self, taskId):
         task = self.taskManager.task(taskId)
