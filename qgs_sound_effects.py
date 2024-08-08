@@ -159,7 +159,6 @@ class QgisSoundEffects:
                 'mapExportComplete': QSoundEffect(),
                 'mapExportError': QSoundEffect(),
                 'printLayoutExportSuccess': QSoundEffect(),
-                'printLayoutExportError': QSoundEffect(),
             }
             for event in self.bound_sounds.keys():
                 eventConfig = self.config.get(event, {})
@@ -250,6 +249,7 @@ class QgisSoundEffects:
     def toggle_export_events(self):
         try:
             if self.enabled is True:
+                # print layout export success
                 config  = self.config.get('printLayoutExportSuccess', {})
                 enabled = config.get('enabled', False)
                 if enabled is True:
@@ -400,16 +400,16 @@ class QgisSoundEffects:
     def configure_settings_window(self):
         self.checkbox_ids = ['processingSuccessCheckBox', 'processingFailureCheckBox', 'zoomInCheckBox',
                         'zoomOutCheckBox','layersChangedCheckBox','renderCompleteCheckBox','renderErrorOccurredCheckBox',
-                        'mapExportCompleteCheckBox','mapExportErrorCheckBox','printLayoutExportSuccessCheckBox','printLayoutExportErrorCheckBox']
+                        'mapExportCompleteCheckBox','mapExportErrorCheckBox','printLayoutExportSuccessCheckBox']
         self.combobox_ids = ['processingSuccessComboBox','processingFailureComboBox','zoomInComboBox',
                         'zoomOutComboBox','layersChangedComboBox','renderCompleteComboBox','renderErrorOccurredComboBox',
-                        'mapExportCompleteComboBox','mapExportErrorComboBox','printLayoutExportSuccessComboBox','printLayoutExportErrorComboBox']
+                        'mapExportCompleteComboBox','mapExportErrorComboBox','printLayoutExportSuccessComboBox']
         self.test_button_ids = ['processingSuccessTestButton','processingFailureTestButton','zoomInTestButton',
                         'zoomOutTestButton','layersChangedTestButton','renderCompleteTestButton','renderErrorOccurredTestButton',
-                        'mapExportCompleteTestButton','mapExportErrorTestButton','printLayoutExportSuccessTestButton','printLayoutExportErrorTestButton']
+                        'mapExportCompleteTestButton','mapExportErrorTestButton','printLayoutExportSuccessTestButton']
         self.volume_ids = ['processingSuccessVolume','processingFailureVolume','zoomInVolume',
                         'zoomOutVolume','layersChangedVolume','renderCompleteVolume','renderErrorOccurredVolume',
-                        'mapExportCompleteVolume','mapExportErrorVolume','printLayoutExportSuccessVolume','printLayoutExportErrorVolume']
+                        'mapExportCompleteVolume','mapExportErrorVolume','printLayoutExportSuccessVolume']
         
         
         for i in range(0, len(self.checkbox_ids)):
