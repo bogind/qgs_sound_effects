@@ -28,10 +28,10 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QCheckBox, QToolButton, QComboBox, QDoubleSpinBox, QSpinBox
 from qgis.gui import QgsGui
 from qgis.core import QgsSettings, QgsApplication, QgsMessageLog, Qgis
-from PyQt5.QtMultimedia import QSoundEffect
+from qgis.PyQt.QtMultimedia import QSoundEffect
 
 # Initialize Qt resources from file resources.py
-from .resources import *  # noqa: F403
+#from .resources import *  # noqa: F403
 from .qgs_sound_effects_provider import QgisSoundEffectsProvider
 # Import the code for the dialog
 from .qgs_sound_effects_dialog import QgisSoundEffectsDialog, QgisSoundEffectsConfigDialog
@@ -418,8 +418,8 @@ class QgisSoundEffects:
 
         self.initProcessing()
 
-        icon_path = ':/plugins/qgs_sound_effects/qgs_effects_icon.png'
-        config_icon_path = ':/plugins/qgs_sound_effects/qgs_effects_config_icon.png'
+        icon_path = os.path.join( self.plugin_dir, 'qgs_effects_icon.png')
+        config_icon_path = os.path.join( self.plugin_dir,'qgs_effects_config_icon.png')
         
         # Add the toolbar
         self.toolbar = self.iface.addToolBar('Sound Effects Toolbar')

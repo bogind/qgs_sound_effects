@@ -25,8 +25,9 @@
 import json
 import os
 from qgis.PyQt.QtCore import QCoreApplication, QUrl
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtTextToSpeech import QTextToSpeech, QVoice
+from qgis.PyQt.QtMultimedia import QMediaPlayer, QAudioOutput
+# does not exist in qgis.PyQt
+from PyQt6.QtTextToSpeech import QTextToSpeech, QVoice
 from qgis.core import (QgsProcessingProvider, QgsProcessingAlgorithm, 
                         QgsProcessingParameterNumber,QgsProcessingParameterEnum,
                         QgsProcessingParameterString,QgsTask, QgsApplication, Qgis,
@@ -62,7 +63,8 @@ class PlaySoundEffectAlgorithm(QgsProcessingAlgorithm):
         return 'Play a sound effect'
     
     def icon(self):
-        return QIcon(':/plugins/qgs_sound_effects/qgs_effects_icon.png')
+        icon_path = os.path.join( self.plugin_dir, 'qgs_effects_icon.png')
+        return QIcon(icon_path)
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -106,19 +108,24 @@ class PlaySoundEffectAlgorithm(QgsProcessingAlgorithm):
         feedback.pushInfo('Playing sound effect: {} at volume {}'.format(self.play_sound['label'], self.play_volume))
 
         self.player = QMediaPlayer()
-        self.player.setVolume(int(self.play_volume*100))
-        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.file_path)))
-        self.player.audioAvailableChanged.connect(lambda: self.player.play())
+        self.audioOutput = QAudioOutput()
+        self.player.setAudioOutput(self.audioOutput)
+        self.audioOutput.setVolume(int(self.play_volume*100))
+        self.player.setSource(QUrl.fromLocalFile(self.file_path))
+        self.player.hasAudioChanged.connect(lambda: self.player.play())
         return super().prepareAlgorithm(parameters, context, feedback)
 
+    def on_audio_changed(self, available: bool):
+        if available:
+            self.player.play()
 
     def processAlgorithm(self, parameters, context, feedback):
         try:
             # will not be triggered in most cases as the sound should have not been loaded yet
             # but just in case
             if not self.player.isAudioAvailable():
-                self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.file_path)))
-                self.player.audioAvailableChanged.connect(lambda: self.player.play())
+                self.player.setMedia(QUrl.fromLocalFile(self.file_path))
+                self.player.hasAudioChanged.connect(lambda: self.player.play())
                 self.player.setVolume(int(self.play_volume*100))
                 self.player.play()
             else:
@@ -164,7 +171,8 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
         return 'Use text to speech to say input text'
     
     def icon(self):
-        return QIcon(':/plugins/qgs_sound_effects/qgs_effects_icon.png')
+        icon_path = os.path.join( self.plugin_dir, 'qgs_effects_icon.png')
+        return QIcon(icon_path)
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -330,12 +338,14 @@ class PlayAudioFileAlgorithm(QgsProcessingAlgorithm):
         return 'Play an audio file'
     
     def icon(self):
-        return QIcon(':/plugins/qgs_sound_effects/qgs_effects_icon.png')
+        icon_path = os.path.join( self.plugin_dir, 'qgs_effects_icon.png')
+        return QIcon(icon_path)
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
     
     def initAlgorithm(self, config):
+        self.plugin_dir = os.path.dirname(__file__)
         file_param = QgsProcessingParameterFile(
                 self.FILE,
                 self.tr('Audio File'),
@@ -360,18 +370,25 @@ class PlayAudioFileAlgorithm(QgsProcessingAlgorithm):
         self.file_path = self.parameterAsFile(parameters, self.FILE, context)
         self.play_volume = self.parameterAsInt(parameters, self.VOLUME, context)
         self.player = QMediaPlayer()
+        self.audioOutput = QAudioOutput()
+        self.player.setAudioOutput(self.audioOutput)
+        self.audioOutput.setVolume(int(self.play_volume*100))
         
         feedback.pushInfo('Playing audio file: {} at volume {}'.format(self.file_path, self.play_volume))
-        self.player.setVolume(int(self.play_volume))
-        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.file_path)))
+        self.player.setSource(QUrl.fromLocalFile(self.file_path))
+        self.player.hasAudioChanged.connect(lambda: self.player.play())
         return super().prepareAlgorithm(parameters, context, feedback)
     
     def processAlgorithm(self, parameters, context, feedback):
         try:
+            print(self.player.isAudioAvailable())
             if not self.player.isAudioAvailable():
-                self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.file_path)))
-                self.player.audioAvailableChanged.connect(lambda: self.player.play())
-                self.player.setVolume(int(self.play_volume))
+                self.player.setMedia(QUrl.fromLocalFile(self.file_path))
+                self.audioOutput = QAudioOutput()
+                self.player.setAudioOutput(self.audioOutput)
+                self.audioOutput.setVolume(int(self.play_volume*100))
+
+                self.player.hasAudioChanged.connect(lambda: self.player.play())
                 self.player.play()
             else:
                 self.player.play()
@@ -392,6 +409,7 @@ class PlayAudioFileAlgorithm(QgsProcessingAlgorithm):
 class QgisSoundEffectsProvider(QgsProcessingProvider):
     def __init__(self):
         QgsProcessingProvider.__init__(self)
+        self.plugin_dir = os.path.dirname(__file__)
 
     def id(self):
         return 'qgis_sound_effects'
@@ -400,7 +418,8 @@ class QgisSoundEffectsProvider(QgsProcessingProvider):
         return self.tr('QGIS Sound Effects')
     
     def icon(self):
-        return QIcon(':/plugins/qgs_sound_effects/qgs_effects_icon.png')
+        icon_path = os.path.join( self.plugin_dir, 'qgs_effects_icon.png')
+        return QIcon(icon_path)
     
     def unload(self):
         pass

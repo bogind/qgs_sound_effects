@@ -4,9 +4,12 @@
 
 [general]
 name=QGIS Sound Effects
-qgisMinimumVersion=3.32
+qgisMinimumVersion=4.0
+qgisMaximumVersion=4.99
+# Added supportsQt6 since QGIS 3.44.11 kept saying the plugin was not compatible
+supportsQt6=True
 description=Add sound effects to QGIS to make work less boring
-version=0.4
+version=0.5
 author=Dror Bogin
 email=dror.bogin@gmail.com
 
@@ -21,6 +24,8 @@ repository=https://github.com/bogind/qgs_sound_effects
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+    2026-06-30 Version 0.5
+        QGIS 4.x/QT6 compatible version, no changes other than that.
     2024-08-08 Version 0.4
         - Added events:
             - Print Layout export - for those high resolution exports that take forever (There is no error event for this one)
