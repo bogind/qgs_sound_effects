@@ -235,8 +235,8 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
             QgsMessageLog.logMessage('Say Task "{name}" was completed'.format(name=self.description()), Qgis.Info)
             self.engine.say(self.text_to_say)
             self.finished.emit()
-        elif state == QTextToSpeech.State.BackendError:
-            QgsMessageLog.logMessage('Say Task "{name}" failed'.format(name=self.description()), Qgis.Info)
+        elif state == QTextToSpeech.State.Error:
+            QgsMessageLog.logMessage('Say Task "{name}" failed, error reason: "{reason}"'.format(name=self.description(),reason=QTextToSpeech.errorReason()), Qgis.Info)
             self.error.emit()
         elif state == QTextToSpeech.State.Speaking:
             pass
