@@ -28,53 +28,58 @@ from qgis.PyQt.QtCore import QCoreApplication, QUrl
 from qgis.PyQt.QtMultimedia import QMediaPlayer, QAudioOutput
 # does not exist in qgis.PyQt
 from PyQt6.QtTextToSpeech import QTextToSpeech, QVoice
-from qgis.core import (QgsProcessingProvider, QgsProcessingAlgorithm, 
-                        QgsProcessingParameterNumber,QgsProcessingParameterEnum,
-                        QgsProcessingParameterString,QgsTask, QgsApplication, Qgis,
-                        QgsMessageLog,QgsProcessingParameterFile)
+from qgis.core import (QgsProcessingProvider,
+                       QgsProcessingAlgorithm,
+                       QgsProcessingParameterNumber,
+                       QgsProcessingParameterEnum,
+                       QgsProcessingParameterString,
+                       QgsTask, QgsApplication, Qgis,
+                       QgsMessageLog, QgsProcessingParameterFile)
 
 
 from qgis.PyQt.QtGui import QIcon
 
 MESSAGE_CATEGORY = 'QGIS Sound Effects'
 
+
 class PlaySoundEffectAlgorithm(QgsProcessingAlgorithm):
-    
-    
+
     SOUND = 'SOUND'
     VOLUME = 'VOLUME'
     LOOPS_ENABLED = 'LOOPS_ENABLED'
     LOOPS = 'LOOPS'
     OUTPUT = 'OUTPUT'
-    
+
     def name(self):
         return 'play_sound'
-    
+
     def displayName(self):
         return 'Play Sound Effect'
-    
+
     def group(self):
         return ''
 
     def groupId(self):
         return ''
-    
+
     def shortHelpString(self):
         return 'Play a sound effect'
-    
+
     def icon(self):
-        icon_path = os.path.join( self.plugin_dir, 'qgs_effects_icon.png')
+        icon_path = os.path.join(self.plugin_dir, 'qgs_effects_icon.png')
         return QIcon(icon_path)
-    
+
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
-    
+
     def initAlgorithm(self, config):
         self.plugin_dir = os.path.dirname(__file__)
-        with open(os.path.join(self.plugin_dir,'sounds.json')) as f:
+        with open(os.path.join(self.plugin_dir, 'sounds.json')) as f:
             self.sounds_config = json.load(f)
             f.close()
-        self.sound_names = [self.sounds_config[s]['label'] for s in self.sounds_config.keys()]
+        self.sound_names = [
+            self.sounds_config[s]['label'] for s in self.sounds_config.keys()
+            ]
 
         sound_param = QgsProcessingParameterEnum(
                 self.SOUND,
@@ -93,19 +98,35 @@ class PlaySoundEffectAlgorithm(QgsProcessingAlgorithm):
             )
         params = [sound_param, volume_param]
         for param in params:
-            self.addParameter(param,
-                createOutput = True)
-            
+            self.addParameter(
+                    param,
+                    createOutput=True
+                )
 
     def prepareAlgorithm(self, parameters, context, feedback):
-        self.play_sound = self.parameterAsEnum(parameters, self.SOUND, context)
-        self.play_volume = self.parameterAsDouble(parameters, self.VOLUME, context)
+        self.play_sound = self.parameterAsEnum(
+            parameters,
+            self.SOUND,
+            context
+            )
+        self.play_volume = self.parameterAsDouble(
+            parameters,
+            self.VOLUME,
+            context
+            )
 
         keys = self.sounds_config.keys()
         self.play_sound = self.sounds_config[list(keys)[self.play_sound]]
-        self.file_path = os.path.join(self.plugin_dir, self.play_sound['filename'])
+        self.file_path = os.path.join(
+            self.plugin_dir,
+            self.play_sound['filename']
+            )
         self.player = QMediaPlayer()
-        feedback.pushInfo('Playing sound effect: {} at volume {}'.format(self.play_sound['label'], self.play_volume))
+        feedback.pushInfo(
+            'Playing sound effect: {} at volume {}'.format(
+                self.play_sound['label'],
+                self.play_volume)
+                )
 
         self.player = QMediaPlayer()
         self.audioOutput = QAudioOutput()
@@ -121,7 +142,8 @@ class PlaySoundEffectAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
         try:
-            # will not be triggered in most cases as the sound should have not been loaded yet
+            # will not be triggered in most cases
+            # the sound should have not been loaded yet
             # but just in case
             if not self.player.isAudioAvailable():
                 self.player.setMedia(QUrl.fromLocalFile(self.file_path))
@@ -131,55 +153,61 @@ class PlaySoundEffectAlgorithm(QgsProcessingAlgorithm):
             else:
                 self.player.play()
             feedback.pushInfo('Sound effect played')
-            return {self.OUTPUT:{
-            'SOUND': self.play_sound['label'], 
-            'VOLUME': self.play_volume, 
-            'OUTPUT': 'Played Sound Effect'}
+            return {self.OUTPUT: {
+                'SOUND': self.play_sound['label'],
+                'VOLUME': self.play_volume,
+                'OUTPUT': 'Played Sound Effect'}
             }
 
         except Exception as e:
-            return {self.OUTPUT: 'Failed to play sound effect', 'ERROR': str(e)}
-            
-    
+            return {self.OUTPUT:
+                    'Failed to play sound effect',
+                    'ERROR': str(e)}
+
     def createInstance(self):
         return PlaySoundEffectAlgorithm()
-    
+
+
 class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
-    """This algorithm uses the PyQt5 QTextToSpeech class and your Operating System's native text-to-speech engine to say some text.
-    If you have multiple text-to-speech engines installed, the first one will be used.
-    If you have multiple voices installed, You can select the voice to use from the available voices.
-    If you have no text-to-speech engine or no voices installed, the algorithm will fail."""
-     
+    """This algorithm uses the PyQt QTextToSpeech class
+    and your Operating System's native text-to-speech engine to say some text.
+    If you have multiple text-to-speech engines installed,
+    the first one will be used.
+    If you have multiple voices installed,
+    You can select the voice to use from the available voices.
+    If you have no text-to-speech engine or no voices installed,
+    the algorithm will fail."""
+
     TEXT = 'TEXT'
     VOICE = 'VOICE'
     VOLUME = 'VOLUME'
     OUTPUT = 'OUTPUT'
-    
+
     def name(self):
         return 'say_text'
-    
+
     def displayName(self):
         return 'Say Some Text'
-    
+
     def group(self):
         return ''
 
     def groupId(self):
         return ''
-    
+
     def shortHelpString(self):
         return 'Use text to speech to say input text'
-    
+
     def icon(self):
-        icon_path = os.path.join( self.plugin_dir, 'qgs_effects_icon.png')
+        icon_path = os.path.join(self.plugin_dir, 'qgs_effects_icon.png')
         return QIcon(icon_path)
-    
+
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
     def flags(self) -> QgsProcessingAlgorithm.Flags:
-        return super().flags() #| QgsProcessingAlgorithm.FlagNoThreading
-    
+        return super().flags()
+
     def initAlgorithm(self, config):
         self.plugin_dir = os.path.dirname(__file__)
         self.engine = None
@@ -189,18 +217,22 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
             self.engine = QTextToSpeech(self.engineNames[0])
         else:
             raise Exception('No text to speech engine available')
-        
+
         self.engine.stateChanged.connect(self.onStateChanged)
 
         self.voices = self.engine.availableVoices()
         if len(self.voices) == 0:
             raise Exception('No voices available for text to speech')
-        
+
         self.voice_names = [v.name() for v in self.voices]
         self.voice_genders = [v.genderName(v.gender()) for v in self.voices]
         self.voice_ages = [v.ageName(v.age()) for v in self.voices]
-        self.voice_choices = ['{} - {} - {}'.format(self.voice_names[i], self.voice_genders[i], self.voice_ages[i]) for i in range(len(self.voices))]
-
+        self.voice_choices = [
+            '{} - {} - {}'.format(
+                self.voice_names[i],
+                self.voice_genders[i],
+                self.voice_ages[i]) for i in range(len(self.voices))
+                ]
 
         text_param = QgsProcessingParameterString(
                 self.TEXT,
@@ -225,18 +257,31 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
             )
         params = [text_param, voice_param, volume_param]
         for param in params:
-            self.addParameter(param,
-                createOutput = True)
-            
+            self.addParameter(
+                    param,
+                    createOutput=True)
 
     def onStateChanged(self, state):
-        QgsMessageLog.logMessage('State changed to {}'.format(state), MESSAGE_CATEGORY, Qgis.Info)
+        QgsMessageLog.logMessage(
+            'State changed to {}'.format(state),
+            MESSAGE_CATEGORY,
+            Qgis.Info
+            )
         if state == QTextToSpeech.State.Ready:
-            QgsMessageLog.logMessage('Say Task "{name}" was completed'.format(name=self.description()), Qgis.Info)
+            QgsMessageLog.logMessage(
+                'Say Task "{name}" was completed'.format(
+                    name=self.description()),
+                Qgis.Info
+                )
             self.engine.say(self.text_to_say)
             self.finished.emit()
         elif state == QTextToSpeech.State.Error:
-            QgsMessageLog.logMessage('Say Task "{name}" failed, error reason: "{reason}"'.format(name=self.description(),reason=QTextToSpeech.errorReason()), Qgis.Info)
+            QgsMessageLog.logMessage(
+                'Say Task "{name}" failed, error reason: "{reason}"'.format(
+                    name=self.description(),
+                    reason=QTextToSpeech.errorReason()
+                    ),
+                Qgis.Info)
             self.error.emit()
         elif state == QTextToSpeech.State.Speaking:
             pass
@@ -244,13 +289,21 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
             pass
         else:
             pass
-            
 
     def prepareAlgorithm(self, parameters, context, feedback):
         self.engine.stop()
-        self.selected_voice = self.parameterAsEnum(parameters, self.VOICE, context)
-        self.text_to_say = self.parameterAsString(parameters, self.TEXT, context)
-        self.play_volume = self.parameterAsDouble(parameters, self.VOLUME, context)
+        self.selected_voice = self.parameterAsEnum(
+            parameters,
+            self.VOICE,
+            context)
+        self.text_to_say = self.parameterAsString(
+            parameters,
+            self.TEXT,
+            context)
+        self.play_volume = self.parameterAsDouble(
+            parameters,
+            self.VOLUME,
+            context)
 
         voice = self.voices[self.selected_voice]
         if type(voice) is not QVoice:
@@ -259,16 +312,19 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
         self.engine.setVoice(voice)
         if self.play_volume < 0 or self.play_volume > 1:
             raise Exception('Volume must be between 0 and 1')
-        
+
         self.engine.setVolume(float(self.play_volume))
 
         return super().prepareAlgorithm(parameters, context, feedback)
-    
+
     @staticmethod
     def speak(task, text_to_say, engine, voice, volume, feedback):
         task.setProgress(0)
-        QgsMessageLog.logMessage('Started speaking task "{}"'.format(text_to_say),
-                             MESSAGE_CATEGORY, Qgis.Info)
+        QgsMessageLog.logMessage(
+            'Started speaking task "{}"'.format(text_to_say),
+            MESSAGE_CATEGORY,
+            Qgis.Info
+            )
         engine.setVoice(voice)
         engine.setVolume(volume)
         engine.stop()
@@ -280,38 +336,56 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
 
     def task_finished(context, successful, results):
         if not successful:
-            QgsMessageLog.logMessage('Speaking Task finished unsucessfully',
-                                    MESSAGE_CATEGORY, Qgis.Warning)
+            QgsMessageLog.logMessage(
+                'Speaking Task finished unsucessfully',
+                MESSAGE_CATEGORY,
+                Qgis.Warning
+            )
         else:
-            QgsMessageLog.logMessage('Speaking Task finished', MESSAGE_CATEGORY, Qgis.Info)
-        
+            QgsMessageLog.logMessage(
+                'Speaking Task finished',
+                MESSAGE_CATEGORY,
+                Qgis.Info
+            )
 
     def processAlgorithm(self, parameters, context, feedback):
         try:
             self.engine.say(self.text_to_say)
-            self.task = QgsTask.fromFunction('Say Task', self.speak, on_finished=self.task_finished, text_to_say=self.text_to_say, engine=self.engine, voice=self.voices[self.selected_voice], volume=self.play_volume)
+            self.task = QgsTask.fromFunction(
+                'Say Task',
+                self.speak,
+                on_finished=self.task_finished,
+                text_to_say=self.text_to_say,
+                engine=self.engine,
+                voice=self.voices[self.selected_voice],
+                volume=self.play_volume
+                )
 
             QgsApplication.taskManager().addTask(self.task)
-            feedback.pushInfo('Saying text: {} with voice: {} at volume {}'.format(self.text_to_say, self.voice_choices[self.selected_voice], self.play_volume))
-    
-            return {self.OUTPUT:{
-            'TEXT': self.text_to_say,
-            'VOICE': self.voice_choices[self.selected_voice], 
-            'VOLUME': self.play_volume, 
-            'OUTPUT': 'Played Sound Effect'}
+            feedback.pushInfo(
+                'Saying text: {} with voice: {} at volume {}'.format(
+                    self.text_to_say,
+                    self.voice_choices[self.selected_voice],
+                    self.play_volume)
+                    )
+
+            return {
+                self.OUTPUT: {
+                    'TEXT': self.text_to_say,
+                    'VOICE': self.voice_choices[self.selected_voice],
+                    'VOLUME': self.play_volume,
+                    'OUTPUT': 'Played Sound Effect'}
             }
 
         except Exception as e:
             return {self.OUTPUT: 'Failed to say something', 'ERROR': str(e)}
-        
-    
+
     def postProcessAlgorithm(self, context, feedback):
         return super().postProcessAlgorithm(context, feedback)
-            
-    
+
     def createInstance(self):
         return SaySomeTextAlgorithm()
-    
+
 
 class PlayAudioFileAlgorithm(QgsProcessingAlgorithm):
     """This algorithm plays a local audio file.
@@ -324,32 +398,35 @@ class PlayAudioFileAlgorithm(QgsProcessingAlgorithm):
 
     def name(self):
         return 'play_audio_file'
-    
+
     def displayName(self):
         return 'Play Audio File'
-    
+
     def group(self):
         return ''
-    
+
     def groupId(self):
         return ''
-    
+
     def shortHelpString(self):
         return 'Play an audio file'
-    
+
     def icon(self):
-        icon_path = os.path.join( self.plugin_dir, 'qgs_effects_icon.png')
+        icon_path = os.path.join(self.plugin_dir, 'qgs_effects_icon.png')
         return QIcon(icon_path)
-    
+
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
-    
+
     def initAlgorithm(self, config):
         self.plugin_dir = os.path.dirname(__file__)
         file_param = QgsProcessingParameterFile(
                 self.FILE,
                 self.tr('Audio File'),
-                fileFilter='Audio Files (*.mp3 *.wav *.ogg *.flac *.m4a *.wma *.aac *.aiff *.au *.mid *.midi *.mpc *.oga *.opus *.ra *.ram *.spx *.xspf);; All Files (*.*)'
+                fileFilter='Audio Files (*.mp3 *.wav *.ogg *.flac '
+                           '*.m4a *.wma *.aac *.aiff *.au *.mid *.midi '
+                           '*.mpc *.oga *.opus *.ra *.ram *.spx *.xspf);; '
+                           'All Files (*.*)'
             )
         volume_param = QgsProcessingParameterNumber(
                 self.VOLUME,
@@ -362,23 +439,33 @@ class PlayAudioFileAlgorithm(QgsProcessingAlgorithm):
             )
         params = [file_param, volume_param]
         for param in params:
-            self.addParameter(param,
-                createOutput = True)
-            
-    
+            self.addParameter(
+                param,
+                createOutput=True)
+
     def prepareAlgorithm(self, parameters, context, feedback):
-        self.file_path = self.parameterAsFile(parameters, self.FILE, context)
-        self.play_volume = self.parameterAsInt(parameters, self.VOLUME, context)
+        self.file_path = self.parameterAsFile(
+                parameters,
+                self.FILE,
+                context)
+        self.play_volume = self.parameterAsInt(
+                parameters,
+                self.VOLUME,
+                context)
         self.player = QMediaPlayer()
         self.audioOutput = QAudioOutput()
         self.player.setAudioOutput(self.audioOutput)
         self.audioOutput.setVolume(int(self.play_volume*100))
-        
-        feedback.pushInfo('Playing audio file: {} at volume {}'.format(self.file_path, self.play_volume))
+
+        feedback.pushInfo(
+            'Playing audio file: {} at volume {}'.format(
+                self.file_path,
+                self.play_volume)
+                )
         self.player.setSource(QUrl.fromLocalFile(self.file_path))
         self.player.hasAudioChanged.connect(lambda: self.player.play())
         return super().prepareAlgorithm(parameters, context, feedback)
-    
+
     def processAlgorithm(self, parameters, context, feedback):
         try:
             print(self.player.isAudioAvailable())
@@ -393,18 +480,18 @@ class PlayAudioFileAlgorithm(QgsProcessingAlgorithm):
             else:
                 self.player.play()
             feedback.pushInfo('Audio file played')
-            return {self.OUTPUT:{
-            'FILE': self.file_path, 
-            'VOLUME': self.play_volume, 
-            'OUTPUT': 'Played Audio File'}
+            return {self.OUTPUT: {
+                'FILE': self.file_path,
+                'VOLUME': self.play_volume,
+                'OUTPUT': 'Played Audio File'}
             }
 
         except Exception as e:
             return {self.OUTPUT: 'Failed to play audio file', 'ERROR': str(e)}
-        
+
     def createInstance(self):
         return PlayAudioFileAlgorithm()
-    
+
 
 class QgisSoundEffectsProvider(QgsProcessingProvider):
     def __init__(self):
@@ -413,20 +500,18 @@ class QgisSoundEffectsProvider(QgsProcessingProvider):
 
     def id(self):
         return 'qgis_sound_effects'
-    
+
     def name(self):
         return self.tr('QGIS Sound Effects')
-    
+
     def icon(self):
-        icon_path = os.path.join( self.plugin_dir, 'qgs_effects_icon.png')
+        icon_path = os.path.join(self.plugin_dir, 'qgs_effects_icon.png')
         return QIcon(icon_path)
-    
+
     def unload(self):
         pass
-    
+
     def loadAlgorithms(self):
         self.addAlgorithm(PlaySoundEffectAlgorithm())
         self.addAlgorithm(SaySomeTextAlgorithm())
         self.addAlgorithm(PlayAudioFileAlgorithm())
-
-    
