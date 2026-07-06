@@ -24,7 +24,7 @@
 
 import json
 import os
-from qgis.PyQt.QtCore import QCoreApplication, QUrl
+from qgis.PyQt.QtCore import QCoreApplication, QUrl, QEventLoop, QTimer
 from qgis.PyQt.QtMultimedia import QMediaPlayer, QAudioOutput
 # does not exist in qgis.PyQt
 from PyQt6.QtTextToSpeech import QTextToSpeech, QVoice
@@ -218,8 +218,6 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
         else:
             raise Exception('No text to speech engine available')
 
-        self.engine.stateChanged.connect(self.onStateChanged)
-
         self.voices = self.engine.availableVoices()
         if len(self.voices) == 0:
             raise Exception('No voices available for text to speech')
@@ -270,19 +268,18 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
         if state == QTextToSpeech.State.Ready:
             QgsMessageLog.logMessage(
                 'Say Task "{name}" was completed'.format(
-                    name=self.description()),
+                    name=self.displayName()),
+                MESSAGE_CATEGORY,
                 Qgis.Info
                 )
-            self.engine.say(self.text_to_say)
-            self.finished.emit()
         elif state == QTextToSpeech.State.Error:
             QgsMessageLog.logMessage(
                 'Say Task "{name}" failed, error reason: "{reason}"'.format(
-                    name=self.description(),
-                    reason=QTextToSpeech.errorReason()
+                    name=self.displayName(),
+                    reason=self.engine.errorReason()
                     ),
-                Qgis.Info)
-            self.error.emit()
+                MESSAGE_CATEGORY,
+                Qgis.Warning)
         elif state == QTextToSpeech.State.Speaking:
             pass
         elif state == QTextToSpeech.State.Paused:
@@ -306,7 +303,7 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
             context)
 
         voice = self.voices[self.selected_voice]
-        if type(voice) is not QVoice:
+        if not isinstance(voice, QVoice):
             raise Exception('Selected voice is not valid')
 
         self.engine.setVoice(voice)
@@ -317,51 +314,19 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
 
         return super().prepareAlgorithm(parameters, context, feedback)
 
-    @staticmethod
-    def speak(task, text_to_say, engine, voice, volume, feedback):
-        task.setProgress(0)
-        QgsMessageLog.logMessage(
-            'Started speaking task "{}"'.format(text_to_say),
-            MESSAGE_CATEGORY,
-            Qgis.Info
-            )
-        engine.setVoice(voice)
-        engine.setVolume(volume)
-        engine.stop()
-        engine.stateChanged.connect(engine.say(text_to_say))
-        engine.resume()
-        task.setProgress(100)
-        feedback.pushInfo('Finished speaking task "{}"'.format(text_to_say))
-        return True
-
-    def task_finished(context, successful, results):
-        if not successful:
-            QgsMessageLog.logMessage(
-                'Speaking Task finished unsucessfully',
-                MESSAGE_CATEGORY,
-                Qgis.Warning
-            )
-        else:
-            QgsMessageLog.logMessage(
-                'Speaking Task finished',
-                MESSAGE_CATEGORY,
-                Qgis.Info
-            )
-
     def processAlgorithm(self, parameters, context, feedback):
         try:
-            self.engine.say(self.text_to_say)
             self.task = QgsTask.fromFunction(
                 'Say Task',
                 self.speak,
                 on_finished=self.task_finished,
                 text_to_say=self.text_to_say,
-                engine=self.engine,
-                voice=self.voices[self.selected_voice],
+                engine_name=self.engineNames[0],
+                selected_voice=self.selected_voice,
                 volume=self.play_volume
-                )
-
+            )
             QgsApplication.taskManager().addTask(self.task)
+
             feedback.pushInfo(
                 'Saying text: {} with voice: {} at volume {}'.format(
                     self.text_to_say,
@@ -379,6 +344,89 @@ class SaySomeTextAlgorithm(QgsProcessingAlgorithm):
 
         except Exception as e:
             return {self.OUTPUT: 'Failed to say something', 'ERROR': str(e)}
+
+    @staticmethod
+    def speak(
+        task,
+        text_to_say,
+        engine_name,
+        selected_voice,
+        volume
+    ):
+        task.setProgress(0)
+        engine = QTextToSpeech(engine_name)
+        voices = engine.availableVoices()
+
+        if len(voices) == 0:
+            raise Exception('No voices available for text to speech')
+
+        if selected_voice < 0 or selected_voice >= len(voices):
+            raise Exception('Selected voice index is out of range')
+
+        engine.setVoice(voices[selected_voice])
+        engine.setVolume(float(volume))
+
+        speech = {'started': False, 'done': False, 'error': False}
+        loop = QEventLoop()
+
+        def on_state_changed(state):
+            if state == QTextToSpeech.State.Speaking:
+                speech['started'] = True
+            elif state == QTextToSpeech.State.Ready:
+                if speech['started']:
+                    speech['done'] = True
+                    loop.quit()
+            elif state == QTextToSpeech.State.Error:
+                speech['error'] = True
+                loop.quit()
+
+        def on_timeout():
+            loop.quit()
+
+        engine.stateChanged.connect(on_state_changed)
+        engine.say(text_to_say)
+        QTimer.singleShot(60000, on_timeout)
+        loop.exec()
+        engine.stateChanged.disconnect(on_state_changed)
+
+        if speech['error']:
+            raise Exception(
+                'Text-to-speech error: {}'.format(
+                    engine.errorReason())
+            )
+        if not speech['started']:
+            raise Exception('Text-to-speech did not start speaking')
+        if not speech['done']:
+            raise Exception('Text-to-speech timed out before completion')
+
+        task.setProgress(100)
+        QgsMessageLog.logMessage(
+            'Finished speaking task "{}"'.format(text_to_say),
+            MESSAGE_CATEGORY,
+            Qgis.Info
+        )
+        return True
+
+    @staticmethod
+    def task_finished(exception, result=None):
+        if exception is not None:
+            QgsMessageLog.logMessage(
+                'Speaking Task failed: {}'.format(str(exception)),
+                MESSAGE_CATEGORY,
+                Qgis.Warning
+            )
+        elif not result:
+            QgsMessageLog.logMessage(
+                'Speaking Task finished unsuccessfully',
+                MESSAGE_CATEGORY,
+                Qgis.Warning
+            )
+        else:
+            QgsMessageLog.logMessage(
+                'Speaking Task finished',
+                MESSAGE_CATEGORY,
+                Qgis.Info
+            )
 
     def postProcessAlgorithm(self, context, feedback):
         return super().postProcessAlgorithm(context, feedback)
