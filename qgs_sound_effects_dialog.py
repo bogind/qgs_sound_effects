@@ -28,7 +28,6 @@ from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import pyqtSlot, pyqtSignal
 
-# This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'qgs_sound_effects_dialog_base.ui'))
 
@@ -46,6 +45,7 @@ class QgisSoundEffectsDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
 
 class QgisSoundEffectsConfigDialog_UI(QtWidgets.QDialog, CONFIG_FORM_CLASS):
     def __init__(self, parent=None):
