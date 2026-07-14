@@ -4,7 +4,7 @@
 
 [general]
 name=QGIS Sound Effects
-qgisMinimumVersion=4.0
+qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 # Added supportsQt6 since QGIS 3.44.11 kept saying the plugin was not compatible
 supportsQt6=True
